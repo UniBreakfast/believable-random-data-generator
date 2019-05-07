@@ -1,0 +1,2 @@
+# believable-random-data-generator
+Arrays of first and last names, nicknames, cities, countries, animals, sonets, fantasy features, elements, creatures etc. Versatile rnd function for numbers, arrays, objects, dates, string combinations etc. Functions to generate arrays of headers with rows of believable data (dates, score, accounting, game creatures and characteristics) easily transformable into objects. May be used for generating stub JSON for training data manipulation or mockups.
