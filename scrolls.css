@@ -1,0 +1,9 @@
+::-webkit-scrollbar {width: 8px; height: 8px}
+::-webkit-scrollbar-corner {background: black}
+::-webkit-scrollbar-track {background: black}
+::-webkit-scrollbar-thumb {
+  background: white;
+  border: 1px solid;
+  border-left-width: 2px;
+  border-right-width: 0
+}

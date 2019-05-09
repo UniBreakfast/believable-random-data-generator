@@ -1,0 +1,18 @@
+.sTable {
+  overflow: auto;
+  max-height: 97vh; /* any but must be limited */
+}
+.sTable table {
+  width: 100%; /* if you want scroll to stay close */
+  border-spacing: 0; /* 1px is nice too */
+}
+.sTable tr>* {
+  white-space: nowrap; /* best to enable wrap per specific column/row */
+  border: 1px solid;
+  background: white;
+}
+.sTable th:first-child, .sTable tr:only-child>* {position: sticky}
+.sTable thead th {top: 0}
+.sTable th:first-child {left: 0}
+.sTable tfoot tr>* {bottom: 0}
+.sTable tr:only-child th:first-child {z-index: 1}

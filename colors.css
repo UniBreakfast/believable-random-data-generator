@@ -1,0 +1,13 @@
+.sTable tbody tr:nth-child(odd)>td {color: #444}
+.sTable tbody tr:nth-child(even)>td {background: #e6e6e6}
+.sTable tbody th {background: lightgray}
+.sTable thead th {
+  background: gray;
+  color: white;
+  border-color: black
+}
+.sTable tfoot tr>* {
+  background: darkgray;
+  text-align: right
+}
+::-webkit-scrollbar-thumb {background: lightgray}
