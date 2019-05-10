@@ -12,10 +12,17 @@ recordsFrom =data=> {
   })
 },
 contbl =data=> {
+  if (!Array.isArray(data) && typeof data=='object') console.table(data)
   if (typeof data[0][0]=='string' && Array.isArray(data[1][0]))
     console.table(recordsFrom(data))
   else console.table(recordsFrom([Array(data[0].length).fill(0).map((_,i)=>`column${i+1}`),data]))
-} ,
+},
+quickTable =data=> {
+  if (!Array.isArray(data)) data = Object.entries(data)
+  let trs = data.reduce((trs,row)=>
+    trs+`<tr><th>${row[0]}</th><td>${row[1]}</td></tr>`,'')
+  document.body.innerHTML = `<table border=1>${trs}</table>`
+},
 makeArr =(length, func, distinct, persist)=> {
   if (distinct) {
     for (var set = new Set(), i=0, max = persist? Infinity:100000;
@@ -82,7 +89,24 @@ rnd =(...args)=> {
     if (arg2 instanceof Date)
       return dtStd(new Date(rnd(arg1.getTime(), arg2.getTime())))
   }
-  if (args.length==3) return makeArr(arg3, _=>rnd(arg1,arg2))
+  if (args.length==3) {
+    if (arg3=='lower') {
+      const min = arg1-1, max = arg2+1,
+            num = min + Math.abs(rnd(-max,-min) + rnd(min, max))
+      return  (min<num && num<max)? num : rnd(arg1,arg2,arg3)
+    }
+    if (arg3=='higher') {
+      const min = arg1-1, max = arg2+1,
+            num = max - Math.abs(rnd(-max,-min) + rnd(min, max))
+      return  (min<num && num<max)? num : rnd(arg1,arg2,arg3)
+    }
+    if (arg3=='center') {
+      const min1 = Math.floor(arg1/2), min2 = arg1-min1,
+            max1 = Math.floor(arg2/2), max2 = arg2-max1
+      return  rnd(min1, max1) + rnd(min2, max2)
+    }
+    return makeArr(arg3, _=>rnd(arg1,arg2))
+  }
   return Math.random()
 },
 
