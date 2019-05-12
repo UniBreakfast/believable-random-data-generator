@@ -1,3 +1,4 @@
+// these template strings autoconvert themselves into arrays on load
 const femaleNames =
   `Abbie,Abby,Abigail,Abigale,Abigayle,Ada,Addie,Addison,Adeline,Adilene,Adrian,
   Adriana,Adrianna,Adrienne,Aileen,Aimee,Aisha,Aja,Akira,Alaina,Alana,Alanna,
@@ -3251,7 +3252,7 @@ const lorems =
   ultricies,urna,ut,varius,vedi,vehicula,vel,velit,venenatis,veni,vestibulum,
   vici,vigoro,vitae,vivamus,viverra,volutpat,vulputate`.split(/,\s*/)
 
-const uniqueSortedStr = (arr) => {
+const uniqueSorted = (arr) => {
   // removes duplicates from an array of primitives and sorts it
   const set = new Set(arr),
         uniqueArr = Array.from(set)
@@ -3272,96 +3273,9 @@ const concatBy = (arr, lineLen) => {
   return lines.trim()+'\n  '+line.replace(/,$/,'')
 }
 
+// only for reforming arr-strings in this file after adding new words
 const maintainArrLines77 = (arr) => {
-  const readyArr = uniqueSortedStr(arr),
+  const readyArr = uniqueSorted(arr),
         lines = concatBy(readyArr, 77)
   return '`'+lines+'`.split(/,\\s*/)'
-}
-
-function count(num1, num2) {
-  return (num1 && num2) ?  rnd(num1, num2)  :  (num1 || num2)
-}
-
-function words(num1, num2) {
-  const arr = [],
-        length =  (num1 && num2)
-          ? rnd(num1, num2)
-          : (num1 || num2 || rnd(3,16))
-  while (arr.length < length) {
-    do  { var word = rnd(lorems) }
-    while (word == arr[arr.length-1])
-    arr.push(word)
-  }
-  return arr
-}
-function sentence(num1, num2) {
-  const words = words(num1, num2)
-  // for (let i=)
-}
-
-
-const lorem = {
-  _words:
-    ["a","ac","accumsan","ad","adipiscing","aenean","aliquam","aliquet","amet","ante","aptent","arcu","at","auctor","augue","aurum","bibendum","blandit","brossi","caputi","class","commodo","condimentum","congue","consectetur","consequat","conubia","convallis","cras","cubilia","curabitur","curae","cursus","dapibus","diam","dictum","dictumst","dolor","donec","dui","duis","egestas","eget","eleifend","elementum","elit","enim","erat","eros","est","et","etiam","eu","euismod","facilisis","fames","faucibus","felis","fermentum","feugiat","fringilla","fusce","gnutti","gravida","habitant","habitasse","hac","hendrerit","himenaeos","iaculis","id","imperdiet","in","inceptos","integer","interdum","ipsum","justo","lacinia","lacus","laoreet","lectus","leo","libero","ligula","litora","lobortis","lorem","luctus","maecenas","magna","malesuada","massa","mattis","mauris","metus","mi","mobile","molestie","mollis","morbi","more","nam","nec","neque","netus","nibh","nisi","non","nostra","nulla","nullam","nunc","odio","orci","ornare","papero","pellentesque","per","perpetum","pharetra","phasellus","placerat","platea","porta","porttitor","posuere","potenti","praesent","pretium","primis","proin","pulvinar","purus","quam","quis","quisque","rhoncus","risus","rutrum","sagittis","sapien","scelerisque","sed","sem","semper","senectus","sit","sociosqu","sodales","sollicitudin","spero","spirum","supero","suscipit","suspendisse","taciti","tellus","tempor","tempus","tincidunt","torquent","tortor","tristique","turpis","ullamcorper","ultrices","ultricies","urna","ut","varius","vedi","vehicula","vel","velit","venenatis","veni","vestibulum","vici","vigoro","vitae","vivamus","viverra","volutpat","vulputate"],
-
-  _random: function(x, y) {
-    var rnd = (Math.random() * 2 - 1) + (Math.random() * 2 - 1) + (Math.random() * 2 - 1)
-    return Math.round(Math.abs(rnd) * x + y)
-  },
-
-  _count: function(min, max) {
-    if (min && max) return Math.floor(Math.random() * (max - min + 1) + min)
-    else if (min) return min
-    else if (max) return max
-    else return this._random(8, 2)
-  },
-
-  words: function(min, max) {
-    const result=[], count = this._count(min, max)
-    // get random words
-    while (result.length < count) {
-      var rnd =
-        this._words[Math.floor(Math.random() * this._words.length)]
-      // do not allow same word twice in a row
-      if (result.length && result[result.length-1] === rnd) continue
-      result.push(rnd)
-    }
-    return result
-  },
-
-  sentence: function(min, max) {
-    var words = this.words(min, max)
-    // add comma(s) to sentence
-    var index = this._random(6, 2)
-    while (index < words.length - 2) {
-      words[index] +=","
-      index += this._random(6, 2)
-    }
-    // append puctation on end
-    const punct = "...!?"
-    words[words.length - 1] += punct.charAt(Math.floor(Math.random() * punct.length))
-    // uppercase first letter
-    words[0] = words[0].charAt(0).toUpperCase() + words[0].slice(1)
-    return words.join(" ")
-  },
-
-  paragraph: function(min, max) {
-    if (!min && !max) { min = 20; max = 60 }
-
-    var result = ""
-    const count = this._count(min, max)
-    // append sentences until limit is reached
-    while (result.slice(0, -1).split(" ").length < count) {
-      result += this.sentence() + " "
-    }
-    result = result.slice(0, -1)
-    // remove words
-    if (result.split(" ").length > count) {
-      var punct = result.slice(-1)
-      result = result.split(" ").slice(0, count).join(" ")
-      result = result.replace(/,$/, "")
-      result += punct
-    }
-    return result
-  }
 }

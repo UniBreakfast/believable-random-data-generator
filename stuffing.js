@@ -1,127 +1,57 @@
-const renest =arr=> arr.reduce((arr,el)=>{
-  el.forEach((el,i)=>arr[i].push(el))
-  return arr
-}, Array(arr[0].length).fill(0).map(_=>[])),
-recordsFrom =data=> {
-  try   { var [headers, rows] = data }
-  catch { var {headers, rows} = data }
-  return rows.map(row => {
-    let obj = {}
-    row.forEach((value,i) => obj[headers[i]] = value)
-    return obj
-  })
-},
-contbl =data=> {
-  if (!Array.isArray(data) && typeof data=='object') console.table(data)
-  if (typeof data[0][0]=='string' && Array.isArray(data[1][0]))
-    console.table(recordsFrom(data))
-  else console.table(recordsFrom([Array(data[0].length).fill(0).map((_,i)=>`column${i+1}`),data]))
-},
-quickTable =data=> {
-  if (!Array.isArray(data)) data = Object.entries(data)
-  let trs = data.reduce((trs,row)=>
-    trs+`<tr><th>${row[0]}</th><td>${row[1]}</td></tr>`,'')
-  document.body.innerHTML = `<table border=1>${trs}</table>`
-},
-makeArr =(length, func, distinct, persist)=> {
-  if (distinct) {
-    for (var set = new Set(), i=0, max = persist? Infinity:100000;
-         set.size<length && i<max; i++)
-      { if (set.size<set.add(func()).size) i=0 }
-    return Array.from(set)
-  }
-  return Array(length).fill(0).map(func)
-},
-nth =day=> {
-  if (day>3 && day<21) return +day+'th'
-  switch (day%10) {
-    case 1: return +day+'st'
-    case 2: return +day+'nd'
-    case 3: return +day+'rd'
-    default: return +day+'th'
-  }
-},
-csNum =num=> (num+'').replace(/\B(?=(\d{3})+(?!\d))/g, ","),
-dtStd =date=> new Date(date.getTime()-(date.getTimezoneOffset()*60000))
-  .toISOString().replace('T',' ').slice(0,-5),
-dtForm =(datetime,format)=> {
-  const [YYYY,MM,DD,HH,mm,ss] = datetime.split(/[- :]/)
-  return format.replace('YYYY',YYYY).replace('YY',YYYY.substring(2))
-    .replace('DDth', nth(DD))
-    .replace('Month', months[MM-1]).replace('MM',MM)
-    .replace('month', monthShorts[MM-1]).replace('DD',DD)
-    .replace('HH',HH).replace('mm',mm).replace('ss',ss)
-},
+// lorem ipsum -like generator for words, sentences and paragraphs
+const lorem = {
+  words(num1, num2) {
+    const arr = [],
+          length =  (num1 && num2)   // determine the length
+            ? rnd(num1, num2)
+            : (num1 || num2 || rnd(3, 16))
 
-rnd =(...args)=> {
-  rnd.counter = rnd.counter? rnd.counter+1 : 1
-  const [arg1,arg2,arg3] = args
+    while (arr.length < length) {
 
-  if (args.length==1) {
-    if (typeof arg1 == 'number')
-      return Math.floor(Math.random()*arg1)
-    if (Array.isArray(arg1)) return arg1[rnd(arg1.length)]
-    if (arg1==Date) return dtStd(new Date(rnd(Date.now())))
-    if (arg1 instanceof Date)
-      return dtStd(new Date(rnd(arg1.getTime(), Date.now())))
-    if (typeof arg1 == 'string') {
-      if (arg1.match(/^.-.$/))
-        return String.fromCharCode(rnd(arg1.charCodeAt(0),arg1.charCodeAt(2)))
-      return dtForm(rnd(Date), arg1)
-    }
-    if (typeof arg1 == 'object') {
-      const max = Object.values(arg1).reduce((sum,num)=>sum+num),
-            entries = Object.entries(arg1)
-      let value;
-      for (let num=rnd(max), i=0; num>=0; i++) {
-        value=entries[i][0]
-        num-=entries[i][1]
-      }
-      return value
-    }
-  }
+      // choose next word, different from the last one
+      do  { var word = rnd(lorems) }
+      while (word == arr[arr.length-1])
 
-  if (args.length==2) {
-    if (typeof arg1=='number' && typeof arg2=='number')
-      return Math.floor(arg1+(arg2-arg1+1)*Math.random())
-    if (typeof arg2=='number') return makeArr(arg2,_=>rnd(arg1))
-    if (Array.isArray(arg2)) return rnd(arg1)+' '+rnd(arg2)
-    if (arg2 instanceof Date)
-      return dtStd(new Date(rnd(arg1.getTime(), arg2.getTime())))
-  }
-  if (args.length==3) {
-    if (arg3=='lower') {
-      const min = arg1-1, max = arg2+1,
-            num = min + Math.abs(rnd(-max,-min) + rnd(min, max))
-      return  (min<num && num<max)? num : rnd(arg1,arg2,arg3)
+      arr.push(word)
     }
-    if (arg3=='higher') {
-      const min = arg1-1, max = arg2+1,
-            num = max - Math.abs(rnd(-max,-min) + rnd(min, max))
-      return  (min<num && num<max)? num : rnd(arg1,arg2,arg3)
-    }
-    if (arg3=='center') {
-      const min1 = Math.floor(arg1/2), min2 = arg1-min1,
-            max1 = Math.floor(arg2/2), max2 = arg2-max1
-      return  rnd(min1, max1) + rnd(min2, max2)
-    }
-    return makeArr(arg3, _=>rnd(arg1,arg2))
-  }
-  return Math.random()
-},
+    return arr
+  },
 
-// rnd() == random decimal from 0 to 1
-// rnd(num) == random integer from 0 to num-1
-// rnd(num1, num2) == random ineger from num1 to num2
-// rnd(arr) == random el from arr
-// rnd(Date) == random ISO-datetime from 1970 to now
-// rnd('DD.MM.YYYY') == random date/time from 1970 to now in provided format
-// rnd(new Date(1234567890)) == random datetime between that date and now
-// rnd(arr, num) == array of num random els from arr
-// rnd(arr1, arr2) == string of random combination of some el from arr1 w el from arr2
-// rnd(Date, num) == array of num random datetimes from 1970 to now
-// rnd('DD.MM.YYYY', num) == array of num random dates/times from 1970 to now in provided format
-countDistinct =arr=>
+  sentence(num1, num2) {
+    const words = this.words(num1, num2)
+
+    // throw in some commas
+    for ( let i = rnd(2, 12, 'lower');
+          i < words.length-2;
+          i += rnd(2, 12, 'lower') )     words[i] += ','
+
+    // titlecase 1st word and punctuation at the end
+    words[0] = words[0][0].toUpperCase() + words[0].slice(1)
+    words[words.length-1] += rnd({'.':5, '!':2, '?':1})
+
+    return words.join(' ')
+  },
+
+  paragraph(num1, num2) {
+    const wordsIn = (text) => text? text.trim().split(' ').length : 0,
+          length =  (num1 && num2)   // determine the length
+            ? rnd(num1, num2)
+            : (num1 || num2 || rnd(20, 80))
+
+    let text = ''
+    while (true) {
+      const sent = this.sentence()
+
+      // add generated sentence or generate another that fits
+      if (wordsIn(text+sent) < length)  text += (text? ' ':'') + sent
+      else if (wordsIn(text) == length)  break
+      else  text += ' ' + this.sentence(length - wordsIn(text))
+    }
+    return text.trim()
+  }
+}
+
+const countDistinct =arr=>
   arr.reduce((obj,el)=>{obj[el]=obj[el]? obj[el]+1:1; return obj},{})
 probably =percentage=> +(rnd(1,100)<=percentage),
 integers =(start, length, density=100)=> {
@@ -220,10 +150,10 @@ birthAge =num=> {
                           'Month DDth, YYYY']) :0,
         ages = needAge? birthdays.map(dt=>
           Math.floor((Date.now()-(new Date(dt)).getTime())/year)) :0
-  birthdays = needBD? birthdays.map(dt=>dtForm(dt,dtFormat)) :0
+  birthdays = needBD? birthdays.map(dt=>formatDatetime(dt,dtFormat)) :0
   return [[needAge? 'age':0, needBD? rnd(['born','date of birth','born on',
     'd.o.b.','birthday']):0].filter(s=>s),
-    renest([needAge? ages:0, needBD? birthdays:0].filter(s=>s))]
+    flipNested([needAge? ages:0, needBD? birthdays:0].filter(s=>s))]
 },
 origins =num=> {
   const preset=rnd(4), city=preset, country=3-preset, joined=preset==1,
@@ -239,10 +169,10 @@ origins =num=> {
 colouring =num=> {
   if (rnd(3)) return [[rnd(['color','favorite color','selected color',
     'preferred color','color preference','color key'])],
-    renest([rnd(colors,num)])]
+    flipNested([rnd(colors,num)])]
   else return [rnd([['primary color','secondary color'],['main color',
     'accent color'],['1st color','2nd color'],['first color','second color'],
-    ['color 1','color 2']]), renest([rnd(colors,num),rnd(colors,num)])]
+    ['color 1','color 2']]), flipNested([rnd(colors,num),rnd(colors,num)])]
 },
 makePoints =()=> {
   const max=rnd(1,12)*10
@@ -258,12 +188,12 @@ hitsManaStamina =num=> {
     headers.push(mana) && columns.push(makeArr(num,makePoints))
   if ([0,1,2].includes(preset))
     headers.push('stamina') && columns.push(makeArr(num,makePoints))
-  return [headers,renest(columns)]
+  return [headers,flipNested(columns)]
 },
 quoting =num=> [[rnd(['motto','creed','code phrase','quote'])],
   makeArr(num,_=>['"'+rnd(rnd(sonnets))
     .replace(/[,?;:!\.]$|\.\.\.$|--$/,'')+rnd({'.':12,'!':3,'?':1})+'"'])]
-makeAmount =max=> csNum(rnd(1000)* 10**rnd(((max||1000)/100+'').length)+''),
+makeAmount =max=> addCommas(rnd(1000)* 10**rnd(((max||1000)/100+'').length)+''),
 scoring =num=> {
   const score = rnd(['score','points total']),
         games = rnd(['rounds won','battles won']),
@@ -274,7 +204,7 @@ scoring =num=> {
     columns.push(makeArr(num,_=>rnd([rnd(1),rnd(50),rnd(300),rnd(1000)])))
   if (preset==2 || preset==3) headers.push('tries before quitting') &&
     columns.push(makeArr(num,_=>rnd([1,2,3,rnd(4,70),rnd(4,400)])))
-  return [headers,renest(columns)]
+  return [headers,flipNested(columns)]
 },
 accounting =num=> {
   const preset = rnd(5), headers = [], columns = []
@@ -285,14 +215,14 @@ accounting =num=> {
                  makeArr(num,_=>'-$'+[0,makeAmount(1e2)][probably(83)]+'.00'))
   if (preset==2 || preset==3) headers.push('debt') &&
     columns.push(makeArr(num,_=>'$'+[makeAmount(1e2),0][probably(77)]+'.00'))
-  return [headers,renest(columns)]
+  return [headers,flipNested(columns)]
 },
 createModify =num=> {
   const year = 365.25*864e5
   return [['created','modified'],makeArr(num,_=>{
     const created = rnd(year)
-    return [dtStd(new Date(Date.now()-created)),
-            dtStd(new Date(Date.now()-rnd(created)))]
+    return [standartDatetime(new Date(Date.now()-created)),
+            standartDatetime(new Date(Date.now()-rnd(created)))]
   })]
 },
 rndData =(cols=[3,20], rows=[100,500])=> {
@@ -343,25 +273,25 @@ persons =num=> {
           'description'])][+titled],makeArr(num,_=>[lorem.paragraph(22,222)])]:0
 
   if (wIds) result.push([['id'],[ids(num)]])
-  result.push([names[0],renest(names[1])])
+  result.push([names[0],flipNested(names[1])])
   if (wBirthAge) {
     const birth_age = birthAge(num)
-    result.push([birth_age[0],renest(birth_age[1])])
+    result.push([birth_age[0],flipNested(birth_age[1])])
   }
-  if (wOrigin) result.push([rOrigin[0],renest(rOrigin[1])])
+  if (wOrigin) result.push([rOrigin[0],flipNested(rOrigin[1])])
   if (wStatus) result.push(rStatus)
-  if (wColor) result.push([rColors[0],renest(rColors[1])])
+  if (wColor) result.push([rColors[0],flipNested(rColors[1])])
   if (wCreature) result.push(titled? rAnimals : rCreatures)
   if (rCreatures2) result.push(rCreatures2)
-  if (wPoints) result.push([rPoints[0],renest(rPoints[1])])
-  if (rQuote) result.push([rQuote[0],renest(rQuote[1])])
-  if (wAmount) result.push([rAmount[0],renest(rAmount[1])])
-  if (wLoremS) result.push([rLoremS[0],renest(rLoremS[1])])
-  if (wLoremP) result.push([rLoremP[0],renest(rLoremP[1])])
-  if (wCreateModify) result.push([rCreateModify[0],renest(rCreateModify[1])])
-  result = renest(result)
+  if (wPoints) result.push([rPoints[0],flipNested(rPoints[1])])
+  if (rQuote) result.push([rQuote[0],flipNested(rQuote[1])])
+  if (wAmount) result.push([rAmount[0],flipNested(rAmount[1])])
+  if (wLoremS) result.push([rLoremS[0],flipNested(rLoremS[1])])
+  if (wLoremP) result.push([rLoremP[0],flipNested(rLoremP[1])])
+  if (wCreateModify) result.push([rCreateModify[0],flipNested(rCreateModify[1])])
+  result = flipNested(result)
   result = result.map(arr=>arr.flat())
-  result[1] = renest(result[1])
+  result[1] = flipNested(result[1])
   return result
 }
 // console.table(recordsFrom(makeArr(10000,_=>persons(3)).reduce((max,cur)=>max[0].length>cur[0].length? max:cur, [[]])))
