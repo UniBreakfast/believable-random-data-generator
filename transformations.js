@@ -36,8 +36,10 @@ const objectifyRecords = (data) => {
   else                      var {headers, rows} = data
 
   return  rows.map( row =>
-    row.reduce( (obj, value, i) =>
-      { obj[headers[i]] = value;  return obj }, {} )
+    row.reduce( (obj, value, i) => {
+      obj[ headers[i] ] = value
+      return obj
+    }, {} )
   )
 }
 

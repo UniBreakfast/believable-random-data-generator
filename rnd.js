@@ -29,6 +29,7 @@ const rnd =(...args)=> {
   }
 
   if (args.length==2) {
+    if (arg2=='%') return +(rnd(1,100)<=arg1)
     if (typeof arg1=='number' && typeof arg2=='number')
       return Math.floor(arg1+(arg2-arg1+1)*Math.random())
     if (typeof arg2=='number') return makeArr(arg2,_=>rnd(arg1))

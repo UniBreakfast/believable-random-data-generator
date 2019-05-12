@@ -51,35 +51,38 @@ const lorem = {
   }
 }
 
-const countDistinct =arr=>
-  arr.reduce((obj,el)=>{obj[el]=obj[el]? obj[el]+1:1; return obj},{})
-probably =percentage=> +(rnd(1,100)<=percentage),
-integers =(start, length, density=100)=> {
-  for (var arr=[]; arr.length<length; start++) {
-    if (probably(density)) arr.push(start) }
-  return arr
-},
-ids =num=> {
-  let pad = rnd(2), more = rnd(2)
-  switch (rnd(4)) {
-    case 1: return integers(1,num)
-    case 2: pad = 0
-    case 3: return integers(1,num,rnd(10,100))
-      .map((int,_,arr)=>(int+'').padStart(pad? (arr[num-1]+'').length:1,'0'))
-    default:
-      const letterSet = rnd(['a-z','A-Z','a-'+rnd('b-z'),'A-'+rnd('B-Z')]),
-      letters = rnd(letterSet,num).sort().reduce((obj,l)=>
-        { obj[l] = 1+(obj[l]||0); return obj }, {}),
-      chars = rnd([['-',''],['.',''],['(',')'],['[',']'],['','']])
+// generates and array of unique identifiers by random or selected preset
+const ids = (num, preset, chars) => {
+  let pad = rnd(2),  // should number be padded with leading zeros?
+      more = rnd(2)  // should there be more zeros than needed?
+
+  // chosen or random preset to generate id column by it
+  preset = (typeof preset != 'undefined')? preset : rnd(4)
+
+  switch ( preset ) {
+    case 1: return integers(1, num)   // just integers
+
+    case 2: pad = 0       // integers with random density without zero padding
+    case 3: {                                             // with zero padding
+      const numbers = integers(1, num, rnd(10, 100)),
+            padding = pad? String(numbers[num-1]).length : 1
+      return numbers.map( int => String(int).padStart(padding,'0') ) }
+
+    default:              // complex ids with letters and more
+      const padding = pad? String(num).length+more : 1,
+            letterSet = rnd( ['a-z', 'A-Z', 'a-'+rnd('b-z'), 'A-'+rnd('B-Z')] ),
+            letters = countUnique( rnd(letterSet, num).sort() )
+      chars = chars || rnd( [['-',''], ['.',''], ['(',')'], ['[',']'], ['','']])
       return Object.entries(letters)
-        .map(([key,value])=>integers(1,value,rnd(10,100))
-        .map(int=>key+chars[0]+(pad
-          ? (int+'').padStart((num+'').length+more,'0'):int)+chars[1])).flat()
+        .map( ([key, value]) => integers( 1, value, rnd(10, 100) )
+          .map( int => key + chars[0] + String(int).padStart(padding,'0') +
+            chars[1])).flat()
   }
-},
-namesGend =num=> {
+}
+
+const namesGend =num=> {
   const males = rnd(30,70),
-        joined = probably(40),
+        joined = rnd(40,'%'),
         titleNick = rnd(3),
         titles = titleNick==1,
         [dr,mr,mrs,miss] = !titles? []:
@@ -93,9 +96,9 @@ namesGend =num=> {
         nickEnd  = nicks? nickPlace==3 :0,
         quote    = nicks? rnd(['"',"'","~",'`',':','-','=']) :0,
         nicksArr = nicks? makeArr(num,_=>rnd(nicknames),1,nicknames.length>num) :0,
-        nameAbbr = joined&&!nickIn? probably(25) :0,
+        nameAbbr = joined&&!nickIn? rnd(25,'%') :0,
         gender = rnd(2),
-        gend = probably(35),
+        gend = rnd(35,'%'),
         naming = rnd(3),
         headers = []
 
@@ -113,14 +116,14 @@ namesGend =num=> {
 
   return [headers, makeArr(num,_=>{
     const row=[],
-          male=probably(males),
-          married=probably(60),
+          male=rnd(males,'%'),
+          married=rnd(60,'%'),
           firstname=rnd([femaleNames,maleNames][male]),
           first=nameAbbr? firstname[0]+'.':firstname,
           last=rnd(lastNames),
           nick=nicksArr? nicksArr.pop() :'',
           _nick_=quote+nick+quote,
-          title=titles? (probably(5)? dr:(male?mr:[mrs,miss][married])):'',
+          title=titles? (rnd(5,'%')? dr:(male?mr:[mrs,miss][married])):'',
           fe_male=[['female','male'],['F','M']][gend]
 
     if (nick1st) row.push(nick)
@@ -138,8 +141,8 @@ namesGend =num=> {
 
     return row
   })]
-},
-birthAge =num=> {
+}
+const birthAge =num=> {
   let birthdays = makeArr(num,_=>
     rnd(new Date(rnd(['1960','1985'])),new Date('2000')))
   const needAge = rnd(6),
@@ -154,8 +157,8 @@ birthAge =num=> {
   return [[needAge? 'age':0, needBD? rnd(['born','date of birth','born on',
     'd.o.b.','birthday']):0].filter(s=>s),
     flipNested([needAge? ages:0, needBD? birthdays:0].filter(s=>s))]
-},
-origins =num=> {
+}
+const origins =num=> {
   const preset=rnd(4), city=preset, country=3-preset, joined=preset==1,
         both=city&&country, city1st=both?rnd(2):0
   if (joined) return [[rnd(['origin','residence','where from','city, country',
@@ -166,21 +169,21 @@ origins =num=> {
   if (city) return [[rnd(['city','from'])], makeArr(num,_=>[rnd(cities)[0]])]
   else return [[rnd(['country','from'])], makeArr(num,_=>[rnd(cities)[1]])]
 }
-colouring =num=> {
+const colouring =num=> {
   if (rnd(3)) return [[rnd(['color','favorite color','selected color',
     'preferred color','color preference','color key'])],
     flipNested([rnd(colors,num)])]
   else return [rnd([['primary color','secondary color'],['main color',
     'accent color'],['1st color','2nd color'],['first color','second color'],
     ['color 1','color 2']]), flipNested([rnd(colors,num),rnd(colors,num)])]
-},
-makePoints =()=> {
+}
+const makePoints =()=> {
   const max=rnd(1,12)*10
   return Math.min(rnd(1,max*1.7),max)+'/'+max
-},
-familiars =(num,distinct)=>
+}
+const familiars =(num,distinct)=>
   makeArr(num,_=> rnd(features,creatures),distinct)
-hitsManaStamina =num=> {
+const hitsManaStamina =num=> {
   const hp = rnd(['life','hitpoints']), mana = rnd(['mana','magicka']),
         preset = rnd(5), headers = [], columns = []
   if (preset) headers.push(hp) && columns.push(makeArr(num,makePoints))
@@ -189,12 +192,12 @@ hitsManaStamina =num=> {
   if ([0,1,2].includes(preset))
     headers.push('stamina') && columns.push(makeArr(num,makePoints))
   return [headers,flipNested(columns)]
-},
-quoting =num=> [[rnd(['motto','creed','code phrase','quote'])],
+}
+const quoting =num=> [[rnd(['motto','creed','code phrase','quote'])],
   makeArr(num,_=>['"'+rnd(rnd(sonnets))
     .replace(/[,?;:!\.]$|\.\.\.$|--$/,'')+rnd({'.':12,'!':3,'?':1})+'"'])]
-makeAmount =max=> addCommas(rnd(1000)* 10**rnd(((max||1000)/100+'').length)+''),
-scoring =num=> {
+const makeAmount =max=> addCommas(rnd(1000)* 10**rnd(((max||1000)/100+'').length)+'')
+const scoring =num=> {
   const score = rnd(['score','points total']),
         games = rnd(['rounds won','battles won']),
         preset = rnd(5), headers = [], columns = []
@@ -205,27 +208,32 @@ scoring =num=> {
   if (preset==2 || preset==3) headers.push('tries before quitting') &&
     columns.push(makeArr(num,_=>rnd([1,2,3,rnd(4,70),rnd(4,400)])))
   return [headers,flipNested(columns)]
-},
-accounting =num=> {
+}
+const accounting =num=> {
   const preset = rnd(5), headers = [], columns = []
   if (preset) headers.push('balance') &&
-    columns.push(makeArr(num,_=>'$'+[0,makeAmount(1e5)][probably(92)]+'.00'))
+    columns.push(makeArr(num,_=>'$'+[0,makeAmount(1e5)][rnd(92,'%')]+'.00'))
   if ([0,1,2].includes(preset)) headers.push('income','spendings') &&
-    columns.push(makeArr(num,_=>'+$'+[0,makeAmount(1e2)][probably(83)]+'.00'),
-                 makeArr(num,_=>'-$'+[0,makeAmount(1e2)][probably(83)]+'.00'))
+    columns.push(makeArr(num,_=>{
+      const sum = [0,makeAmount(1e2)][rnd(83,'%')]
+      return (sum? '+':'')+'$'+sum+'.00'
+    }), makeArr(num,_=>{
+      const sum = [0,makeAmount(1e2)][rnd(83,'%')]
+      return (sum? '-':'')+'$'+sum+'.00'
+    }))
   if (preset==2 || preset==3) headers.push('debt') &&
-    columns.push(makeArr(num,_=>'$'+[makeAmount(1e2),0][probably(77)]+'.00'))
+    columns.push(makeArr(num,_=>'$'+[makeAmount(1e2),0][rnd(77,'%')]+'.00'))
   return [headers,flipNested(columns)]
-},
-createModify =num=> {
+}
+const createModify =num=> {
   const year = 365.25*864e5
   return [['created','modified'],makeArr(num,_=>{
     const created = rnd(year)
     return [standartDatetime(new Date(Date.now()-created)),
             standartDatetime(new Date(Date.now()-rnd(created)))]
   })]
-},
-rndData =(cols=[3,20], rows=[100,500])=> {
+}
+const rndData =(cols=[3,20], rows=[100,500])=> {
   if (typeof cols == 'number') cols = rnd(2,cols)
   else cols = rnd(cols[0],cols[1])
   if (typeof rows == 'number') rows = rnd(2,rows)
@@ -234,10 +242,10 @@ rndData =(cols=[3,20], rows=[100,500])=> {
   // decideOptions()
   // generateData()
 
-  const wIds = probably(80)
+  const wIds = rnd(80,'%')
 
-},
-persons =num=> {
+}
+const persons =num=> {
   let result = []
   const names = namesGend(num),
         titled = names[1][0].reduce((titled,el)=> titled?true : !!el
