@@ -30,12 +30,18 @@ const rnd =(...args)=> {
 
   if (args.length==2) {
     if (arg2=='%') return +(rnd(1,100)<=arg1)
-    if (typeof arg1=='number' && typeof arg2=='number')
-      return Math.floor(arg1+(arg2-arg1+1)*Math.random())
+    if (typeof arg1=='number' && typeof arg2=='number') {
+      const [min, max] =  arg1 < arg2?  [arg1, arg2]  :  [arg2, arg1]
+      return Math.floor(min+(max-min+1)*Math.random())
+    }
     if (typeof arg2=='number') return makeArr(arg2,_=>rnd(arg1))
     if (Array.isArray(arg2)) return rnd(arg1)+' '+rnd(arg2)
     if (arg2 instanceof Date)
       return standartDatetime(new Date(rnd(arg1.getTime(), arg2.getTime())))
+    if (typeof arg2=='string') {  // should be like 'lower','higher','center'
+      if (typeof arg1=='number')  return rnd(0, arg1-1, arg2)
+      if (Array.isArray(arg1))  return arg1[rnd(0, arg1.length-1, arg2)]
+    }
   }
   if (args.length==3) {
     if (arg3=='lower') {
