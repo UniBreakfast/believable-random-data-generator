@@ -9,26 +9,40 @@ const quickTable = (data) => {
 }
 
 const namesGend = (num, options={}) => {
-  let { joined, form } = options
-  const { playful, formal, casual } =  // decide on context and form of naming
-    { [form || rnd(['playful', 'formal', 'casual'], 'lower')]: 1 }
-  joined = joined || rnd(2) // decide should the first/last names go together
-  const males = rnd(30,70),
-        [dr,mr,mrs,miss] = !formal? []:
-          rnd([['Dr.','Mr.','Mrs.','Miss'],['dr.','mr.','mrs.','miss']]),
-        name1st = playful&&joined? 1 : rnd(2),
-        nickPlace = joined? rnd(4):rnd(2),
-        nick1st  = playful? nickPlace==0 :0,
-        nickLast = playful? nickPlace==1 :0,
-        nickIn   = playful? nickPlace==2 :0,
-        nickEnd  = playful? nickPlace==3 :0,
-        quote    = playful? rnd(['"',"'","~",'`',':','-','=']) :0,
-        nicksArr = playful? makeArr(num,_=>rnd(nicknames),1,nicknames.length>num) :0,
-        nameAbbr = joined&&!nickIn? rnd(25,'%') :0,
-        gender = rnd(2),
-        gend = rnd(35,'%'),
-        naming = rnd(3),
-        headers = []
+  let { joined, form, gender, name1st } = options
+
+  // decide on form of naming and the context of data generated
+  const males = rnd(30, 70),
+        { playful, formal, casual } = (typeof form == 'object')?
+          form : { [form || rnd(['playful', 'formal', 'casual'], 'lower')]: 1 }
+  // should the first/last names go together
+  joined = (joined == undefined)? rnd(2) : joined
+  gender = (gender == undefined)? rnd(2) : gender // should there be gender
+  name1st = (playful && joined)? 1 : (name1st == undefined)? rnd(2) : name1st
+
+  if (joined)  var nameAbbr = (joined.nameAbbr == undefined)?
+    rnd(25,'%') : joined.nameAbbr
+  else  var naming = rnd(3)
+
+  if (gender)  var [f, m] = Array.isArray(gender)?
+    gender : [['female', 'male'], ['F', 'M']][ rnd(35, '%') ]
+
+  if (formal)  var [dr, mr, mrs, miss] =
+    rnd( [['Dr.', 'Mr.', 'Mrs.', 'Miss'], ['dr.', 'mr.', 'mrs.', 'miss']] )
+
+  if (playful) {
+    var { nick1st, nickLast, nickIn, nickEnd, quote } = playful,
+    nicksArr = makeArr(num, ()=> rnd(nicknames), 1, nicknames.length > num)
+
+    if (!nick1st && !nickLast && !nickIn && !nickEnd)
+      ({ nick1st, nickLast, nickIn, nickEnd } = { [['nick1st', 'nickLast',
+        'nickIn', 'nickEnd'][joined? rnd(4) : rnd(2)]]:1 })
+    quote = quote || rnd( ['"', "'", "~", '`', ':', '-', '='] )
+
+    if (joined && nickIn)  nameAbbr = 0
+  }
+
+  const headers = []
 
   if (nick1st) headers.push(rnd(['nick','nickname','nickname','alias','callsign']))
   if (joined) headers.push(rnd(['name','fullname','full name']))
@@ -37,12 +51,12 @@ const namesGend = (num, options={}) => {
     if (name1st) headers.push(['firstname','first name','name'][naming])
     headers.push(['lastname','last name','surname'][naming])
     if (!name1st) headers.push(['firstname','first name','name'][naming])
-    if (nickLast)
-      headers.push(rnd(['nick','nickname','nickname','alias','callsign']))
   }
+  if (nickLast)
+    headers.push(rnd(['nick','nickname','nickname','alias','callsign']))
   if (gender) headers.push('gender')
 
-  return [headers, makeArr(num,_=>{
+  const rows = makeArr(num,_=>{
     const row=[],
           male=rnd(males,'%'),
           married=rnd(60,'%'),
@@ -51,8 +65,7 @@ const namesGend = (num, options={}) => {
           last=rnd(lastNames),
           nick=nicksArr? nicksArr.pop() :'',
           _nick_=quote+nick+quote,
-          title=formal? (rnd(5,'%')? dr:(male?mr:[mrs,miss][married])):'',
-          fe_male=[['female','male'],['F','M']][gend]
+          title=formal? (rnd(5,'%')? dr:(male?mr:[mrs,miss][married])):''
 
     if (nick1st) row.push(nick)
     if (joined) row.push((title? title+' ':'')+
@@ -63,12 +76,13 @@ const namesGend = (num, options={}) => {
       if (name1st) row.push(first)
       row.push(last)
       if (!name1st) row.push(first)
-      if (nickLast) row.push(nick)
     }
-    if (gender) row.push(fe_male[male])
+    if (nickLast) row.push(nick)
+    if (gender) row.push([f, m][male])
 
     return row
-  })]
+  })
+  return [headers, rows]
 }
 
 
