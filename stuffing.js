@@ -81,22 +81,155 @@ const ids = (num, preset, chars) => {
 }
 
 
-const birthAge =num=> {
-  let birthdays = makeArr(num,_=>
-    rnd(new Date(rnd(['1960','1985'])),new Date('2000')))
-  const needAge = rnd(6),
-        year = 365.25*864e5
-        needBD  = needAge? rnd(3) :1,
-        dtFormat = needBD? rnd(['YYYY-MM-DD','DD.MM.YYYY','DD.MM.YY',
-                          'MM/DD/YY',"DD month 'YY",'DDth of Month, YYYY',
-                          'Month DDth, YYYY']) :0,
-        ages = needAge? birthdays.map(dt=>
-          Math.floor((Date.now()-(new Date(dt)).getTime())/year)) :0
-  birthdays = needBD? birthdays.map(dt=>formatDatetime(dt,dtFormat)) :0
-  return [[needAge? 'age':0, needBD? rnd(['born','date of birth','born on',
-    'd.o.b.','birthday']):0].filter(s=>s),
-    flipNested([needAge? ages:0, needBD? birthdays:0].filter(s=>s))]
+// generates records with names (and optionally titles/nicknames, gender)
+const namesGenders = (num, options={}) => {
+  /* options may be like
+  {
+    joined: 0 or {nameAbbr: 1 or 0},
+    form: {casual or formal or playful: 1 or {
+      nick1st or nickLast or nickIn or nickEnd: 1,
+      quote: '**' or any 'string'
+    } },
+    gender: 0 or 1 or ['girl', 'boy'],
+    name1st: 0 or 1
+  } */
+
+  // preparations section: setting the variables for the generation process
+  let { joined, form, gender, name1st } = options
+
+  // decide on form of naming and the context of data generated
+  const males = rnd(30, 70),   // male/female percentage
+  // choice of form: gaming-like with nicknames, formal with titles or casual
+      { playful, formal, casual } = (typeof form == 'object')?
+          form : { [form || rnd(['playful', 'formal', 'casual'], 'lower')]: 1 }
+  // should the first/last names go together
+  joined = (joined == undefined)? rnd(2) : joined  // first/lastname in one cell
+  gender = (gender == undefined)? rnd(2) : gender  // should there be gender
+  name1st = (playful && joined)? 1 : (name1st == undefined)? rnd(2) : name1st
+
+  if (joined)  var nameAbbr = (joined.nameAbbr == undefined)?
+    rnd(25,'%') : joined.nameAbbr   // should there be just the initials
+  else  var naming = rnd(3)  // choosing naming combinations for name columns
+
+  if (gender)  var [f, m] = Array.isArray(gender)?   // words for genders
+    gender : [['female', 'male'], ['F', 'M']][ rnd(35, '%') ]
+
+  if (formal)  var [dr, mr, mrs, miss] =      // abbreviations for titles
+    rnd( [['Dr.', 'Mr.', 'Mrs.', 'Miss'], ['dr.', 'mr.', 'mrs.', 'miss']] )
+
+  if (playful) {
+    var { nick1st, nickLast, nickIn, nickEnd, quote } = playful,
+    // an array to take nicknames from it later, preferrably unique
+    nicksArr = makeArr(num, ()=> rnd(nicknames), 1, nicknames.length > num)
+    // deciding the postion for nickname value
+    if (!nick1st && !nickLast && !nickIn && !nickEnd)
+      ({ nick1st, nickLast, nickIn, nickEnd } = { [['nick1st', 'nickLast',
+        'nickIn', 'nickEnd'][joined? rnd(4) : rnd(2)]]:1 })
+    // choosing the sign around nickname
+    quote = quote || rnd( ['"', "'", "~", '`', ':', '-', '='] )
+    // what if nickname is between the first and last name and initials only
+    if (joined && nickIn && nameAbbr) {
+      if (joined.nameAbbr && !playful.nickIn)  [nickIn, nickEnd] = [0, 1]
+      else nameAbbr = 0
+    }
+  }
+
+  // generation section: filling the headers and rows with random data
+  const headers = []
+
+  if (nick1st)
+    headers.push( rnd(['nick', 'nickname', 'nickname', 'alias', 'callsign']) )
+  if (joined)  headers.push( rnd(['name', 'fullname', 'full name']) )
+  else {
+    if (formal)  headers.push('title')
+    if (name1st)  headers.push( ['firstname', 'first name', 'name'][naming] )
+    headers.push( ['lastname', 'last name', 'surname'][naming] )
+    if (!name1st)  headers.push( ['firstname', 'first name', 'name'][naming] )
+  }
+  if (nickLast)
+    headers.push( rnd(['nick', 'nickname', 'nickname', 'alias', 'callsign']) )
+  if (gender)  headers.push('gender')
+
+  const rows = makeArr(num, ()=> {
+    // prepare variables for each row
+    const male = rnd(males,'%'),
+          last = rnd(lastNames)
+    let first = rnd( [femaleNames, maleNames][male] )
+    if (nameAbbr)  first = first[0]+'.'
+    // nickname preparation
+    if (playful)  var nick = nicksArr.pop()
+    if (nickIn || nickEnd)  var _nick_ = quote + nick + quote
+    // choice of the right title
+    if (formal)  var title = !rnd(20)? dr : male? mr : rnd(3)? mrs : miss
+
+    const row = []
+
+    if (nick1st)  row.push(nick)
+    // adds joined full name in format selected by various variables
+    if (joined)  row.push( (title? title+' ' : '') + (name1st? first+' ' : '')
+      + (nickIn? _nick_+' ' : '') + last + (!name1st? ', '+first : '')
+      + (nickEnd? ' aka '+_nick_ : '') )
+    else {
+      if (formal)  row.push(title)
+      if (name1st)  row.push(first)
+      row.push(last)
+      if (!name1st)  row.push(first)
+    }
+    if (nickLast)  row.push(nick)
+    if (gender)  row.push( [f, m][male] )
+
+    return row
+  })
+  return [headers, rows]
 }
+
+
+// generates records with birthdays and corresponding age
+const birthAge = (num, options={}) => {
+  let { age, spread, birthday, format } = options
+  const [ minAge, maxAge, tendency ] = spread || [19, 69, 'higher'],
+        adultYearsAgo = new Date().getFullYear() - minAge,
+        elderYearsAgo = new Date().getFullYear() - maxAge,
+        beginTimestamp = new Date( String(elderYearsAgo) ).getTime(),
+        endTimestamp   = new Date( String(adultYearsAgo) ).getTime(),
+        year = 365.25*864e5
+
+  if (age == undefined && birthday == undefined) {
+    age = rnd(6)
+    birthday = age? rnd(3) : 1
+  }
+  else if (!age &&  birthday === 0)  age = 1
+  else if (!age && !birthday)   birthday = 1
+  else if ( age && !birthday)   birthday = rnd(3)
+  else if (!age &&  birthday)        age = rnd(6)
+
+
+  format = format || rnd( ['YYYY-MM-DD', 'DD.MM.YYYY', 'DD.MM.YY', 'MM/DD/YY',
+                     "DD month 'YY",'DDth of Month, YYYY', 'Month DDth, YYYY'] )
+
+  let birthdays = makeArr( num, ()=>
+    standartDatetime(new Date( rnd(beginTimestamp, endTimestamp, tendency) ) ) )
+
+  if (age)  var ages = birthdays.map( datetime =>
+          Math.floor( (Date.now() - new Date(datetime).getTime()) / year ) )
+
+  const headers = [], rows = []
+  if (age) {
+    headers.push('age')
+    rows.push( birthdays.map( datetime =>
+      Math.floor( (Date.now() - new Date(datetime).getTime()) / year )
+    ) )
+  }
+  if (birthday) {
+    headers.push(rnd( ['born','born on','date of birth','d.o.b.','birthday'] ))
+    rows.push( birthdays.map( datetime => formatDatetime(datetime, format) ) )
+  }
+
+  return [headers, flipNested(rows)]
+}
+
+
+
 const origins =num=> {
   const preset=rnd(4), city=preset, country=3-preset, joined=preset==1,
         both=city&&country, city1st=both?rnd(2):0
@@ -184,9 +317,9 @@ const rndData =(cols=[3,20], rows=[100,500])=> {
   const wIds = rnd(80,'%')
 
 }
-const persons =num=> {
+const persons = (num, options={}) => {
   let result = []
-  const names = namesGend(num),
+  const names = namesGenders(num, options),
         titled = names[1][0].reduce((titled,el)=> titled?true : !!el
                   .match(/mr\.|mrs\.|miss|dr\./i),0),
         wIds = rnd(5),

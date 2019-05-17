@@ -1,5 +1,6 @@
 let rowsToMake = 500
 
+// let [headers, rows] = persons(rowsToMake, {joined:{nameAbbr:1},form:{playful:{nickEnd:1}}}),
 let [headers, rows] = persons(rowsToMake),
     footers = headers
 

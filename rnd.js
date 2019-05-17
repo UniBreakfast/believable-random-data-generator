@@ -29,7 +29,7 @@ const rnd =(...args)=> {
   }
 
   if (args.length==2) {
-    if (arg2=='%') return +(rnd(1,100)<=arg1)
+    if (arg2 == '%')  return Number(rnd(1, 100) <= arg1)
     if (typeof arg1=='number' && typeof arg2=='number') {
       const [min, max] =  arg1 < arg2?  [arg1, arg2]  :  [arg2, arg1]
       return Math.floor(min+(max-min+1)*Math.random())
@@ -45,7 +45,7 @@ const rnd =(...args)=> {
   }
   if (args.length==3) {
     if (arg3=='lower') {
-      const min = arg1-1, max = arg2+1,
+      const min = Math.min(arg1, arg2)-1, max = Math.max(arg1, arg2)+1,
             num = min + Math.abs(rnd(-max,-min) + rnd(min, max))
       return  (min<num && num<max)? num : rnd(arg1,arg2,arg3)
     }
@@ -59,6 +59,7 @@ const rnd =(...args)=> {
             max1 = Math.floor(arg2/2), max2 = arg2-max1
       return  rnd(min1, max1) + rnd(min2, max2)
     }
+    if (!arg3)  return rnd(arg1, arg2)
     return makeArr(arg3, _=>rnd(arg1,arg2))
   }
   return Math.random()

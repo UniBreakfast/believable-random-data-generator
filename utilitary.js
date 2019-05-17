@@ -12,11 +12,17 @@ const integers = (start, length, density=100) => {
 const makeArr = (length, func, distinct, persist) => {
   if (distinct) {
     const max = persist? Infinity : 100000
-    for (var set = new Set(), i = 0;  set.size < length && i < max;  i++)
-      i = (set.size < set.add(func()).size)? 0 : i
+    for (var set = new Set(), i = 0;  set.size < length && i < max;  i++) {
+      const next = func()
+      if (next != undefined) i = (set.size < set.add(next).size)? 0 : i
+    }
     return Array.from(set)
   }
-  return Array(length).fill(0).map(func)
+  return Array(length).fill(0).map( () => {
+    let item = func()
+    while (item == undefined) item = func()
+    return item
+  } )
 }
 
 
