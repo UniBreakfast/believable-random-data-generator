@@ -1,5 +1,4 @@
 
-
 const rnd =(...args)=> {
   rnd.counter = rnd.counter? rnd.counter+1 : 1
   const [arg1,arg2,arg3] = args

@@ -84,14 +84,15 @@ const ids = (num, preset, chars) => {
 // generates records with names (and optionally titles/nicknames, gender)
 const namesGenders = (num, options={}) => {
   /* options may be like
-  {
-    joined: 0 or {nameAbbr: 1 or 0},
+  {                        // all omitted options are left to be chosen randomly
+    joined: 0 or {nameAbbr: 1 or 0},  // first/last in one cell, initial or full
+    // just first/last name or with title, or with nicknames
     form: {casual or formal or playful: 1 or {
-      nick1st or nickLast or nickIn or nickEnd: 1,
-      quote: '**' or any 'string'
+      nick1st or nickLast or nickIn or nickEnd: 1,          // nickname position
+      quote: '**' or any 'string'        // character to wrap nickname if joined
     } },
-    gender: 0 or 1 or ['girl', 'boy'],
-    name1st: 0 or 1
+    gender: 0 or 1 or ['girl', 'boy'],     // alternative labels for male/female
+    name1st: 0 or 1              // should the firtname go before/after the last
   } */
 
   // preparations section: setting the variables for the generation process
@@ -186,61 +187,106 @@ const namesGenders = (num, options={}) => {
 
 // generates records with birthdays and corresponding age
 const birthAge = (num, options={}) => {
-  let { age, spread, birthday, format } = options
-  const [ minAge, maxAge, tendency ] = spread || [19, 69, 'higher'],
-        adultYearsAgo = new Date().getFullYear() - minAge,
+  /* options may be like
+  {
+    age: 1 or 0,                // show age or don't, random 5:1 otherwise
+    spread: [
+      minAge: number in years,   maxAge: number in years
+      tendency: 'younger','average','older'       // even spread otherwise
+    ],                                      // 19-69, 'younger' if omitted
+    birthday: 1 or 0,      // show birthday or don't, random 2:1 otherwise
+    format: string like 'DD.MM.YYYY' // randomly selected preset otherwise
+  } */
+
+  let { age, spread, birthday, format } = options,
+      // deciding the limits for ages and how do they spread
+      [ minAge, maxAge, tendency ] = spread || [19, 69, 'higher']
+  const adultYearsAgo = new Date().getFullYear() - minAge,
         elderYearsAgo = new Date().getFullYear() - maxAge,
+        // timestamps for earliest/latest birthdays possible
         beginTimestamp = new Date( String(elderYearsAgo) ).getTime(),
         endTimestamp   = new Date( String(adultYearsAgo) ).getTime(),
-        year = 365.25*864e5
+        year = 365.25*864e5  // just a constant for millisaconds in a year
 
-  if (age == undefined && birthday == undefined) {
-    age = rnd(6)
-    birthday = age? rnd(3) : 1
-  }
-  else if (!age &&  birthday === 0)  age = 1
-  else if (!age && !birthday)   birthday = 1
-  else if ( age && !birthday)   birthday = rnd(3)
-  else if (!age &&  birthday)        age = rnd(6)
+  // processing all possible combinations of present/absent age/birthday
+  if (age == undefined && birthday == undefined)
+      age = rnd(6),       birthday = age? rnd(3) : 1
+  else if (!age && birthday === 0)     age = 1
+  else if (!age && !birthday)     birthday = 1
+  else if ( age && birthday === undefined)  birthday = rnd(3)
+  else if (!age === undefined && birthday)       age = rnd(6)
 
-
-  format = format || rnd( ['YYYY-MM-DD', 'DD.MM.YYYY', 'DD.MM.YY', 'MM/DD/YY',
-                     "DD month 'YY",'DDth of Month, YYYY', 'Month DDth, YYYY'] )
-
+  if (tendency)  tendency =
+    ['higher','center','lower'][['younger','average','older'].indexOf(tendency)]
+  // generate an array of birthdays as was planned
   let birthdays = makeArr( num, ()=>
     standartDatetime(new Date( rnd(beginTimestamp, endTimestamp, tendency) ) ) )
 
-  if (age)  var ages = birthdays.map( datetime =>
-          Math.floor( (Date.now() - new Date(datetime).getTime()) / year ) )
-
-  const headers = [], rows = []
-  if (age) {
-    headers.push('age')
-    rows.push( birthdays.map( datetime =>
-      Math.floor( (Date.now() - new Date(datetime).getTime()) / year )
-    ) )
-  }
+  const headers = [], columns = []
+  if (age)
+    headers.push('age'),
+    // generate an array of ages according to birthdays
+    columns.push( birthdays.map( datetime =>
+      Math.floor( (Date.now() - new Date(datetime).getTime()) / year ) ) )
   if (birthday) {
     headers.push(rnd( ['born','born on','date of birth','d.o.b.','birthday'] ))
-    rows.push( birthdays.map( datetime => formatDatetime(datetime, format) ) )
+    // decide on format and format birthdays accordingly
+    format = format || rnd( ['YYYY-MM-DD', 'DD.MM.YYYY', 'DD.MM.YY', 'MM/DD/YY',
+                     "DD month 'YY",'DDth of Month, YYYY', 'Month DDth, YYYY'] )
+    columns.push( birthdays.map( datetime =>
+      formatDatetime(datetime, format) ) )
+  }
+  return [headers, flipNested(columns)]  // flip columns array to the rows array
+}
+
+
+// generates records with cities and corresponding countries
+const origins = (num, options={}) => {
+  /* options may be like
+  {
+    joined: 1 or 0,     // should city and country go in one field
+    city: 1 or 0,                 // show or don't show the cities
+    country: 1 or 0,              // show or don't show countries
+    // city or country would be shown anyway
+    preset: 0, 1, 2 or 3     // alternative to previous properties, options are:
+                // 0 - country, 1 - "city, country", 2 - city, country, 3 - city
+  }     // in case of no options random preset      */
+
+  let { joined, city, country, preset } = options,
+      // should city column go before country
+      city1st = !joined && rnd(2)
+
+  preset = (preset === undefined)? rnd(4) : preset
+  // 0 - country, 1 - "city, country", 2 - city, country, 3 - city
+
+  // in case city and country should be in one cell
+  if (city !== 0 && country !== 0 && joined !== 0  &&  preset == 1  ||  joined)
+    return [ [rnd( ['origin','residence','where from','from','city, country'])],
+      makeArr(num, ()=> {
+        const pair = rnd(cities)
+        return [`${ pair[0] }, ${ pair[1] }`]
+      } ) ]
+
+  // in case city / country is not defined directly
+  if (   city === undefined)  city = (country !== 0)? preset : 1
+  if (country === undefined)  country = 3 - preset
+
+  if (city && country) {         // in case city & country are in separat cells
+    if (options.city<=options.country || city1st)           // city first
+      return [ ['city','country'], rnd(cities, num) ]
+    // country first
+    return [ ['country','city'], makeArr(num, ()=> [...rnd(cities)].reverse() )]
   }
 
-  return [headers, flipNested(rows)]
+  if (city)   // in case there shoud be only city
+    return [ [rnd( ['city','from'] )], makeArr(num, ()=> [rnd(cities)[0]] ) ]
+
+  else     // in case there shoud be only country
+    return [ [rnd( ['country','from'] )], makeArr(num, ()=> [rnd(cities)[1]]) ]
 }
 
 
 
-const origins =num=> {
-  const preset=rnd(4), city=preset, country=3-preset, joined=preset==1,
-        both=city&&country, city1st=both?rnd(2):0
-  if (joined) return [[rnd(['origin','residence','where from','city, country',
-    'from'])], makeArr(num,_=>
-      { const pair=rnd(cities); return [`${pair[0]}, ${pair[1]}`]})]
-  if (city1st) return [['city','country'], rnd(cities,num)]
-  if (both) return [['country','city'], makeArr(num,_=>rnd(cities).reverse())]
-  if (city) return [[rnd(['city','from'])], makeArr(num,_=>[rnd(cities)[0]])]
-  else return [[rnd(['country','from'])], makeArr(num,_=>[rnd(cities)[1]])]
-}
 const colouring =num=> {
   if (rnd(3)) return [[rnd(['color','favorite color','selected color',
     'preferred color','color preference','color key'])],

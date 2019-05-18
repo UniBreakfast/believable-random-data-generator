@@ -625,7 +625,7 @@ const nicknames =
   Mizzen,Mo,Monarch,Monroe,Monsoon,Monster,Mooch,Moonflower,Moonshine,Moonshot,
   Moonstone,Moro,Moses,Moth,Motor,Mountain,Mr.Magoo,Mr.President,Mr.Spock,
   Mother,Father,Patriarch,Sunny,Santino,Brainwash,Omar,Lust,Nuke,Fallout,
-  Deathclaw,Miracle,
+  Deathclaw,Miracle,Savior,Messiah,Liberty,Fargo,Grimoire,Diablo,
   Mrs.Doubt-Fire,Mudskipper,Muffin,Muffy,Mulberry,Munich,Mushroom,Music,
   Mustang,Mustard,Muzzie,NFL,Nail,Nails,Napoleon,Narn,Naruto,Navigator,Neptune,
   News,Newton,Next,Nibiru,Night,Nightcap,Nintendo,No-Man,Nobel,Noble,Nocebo,
