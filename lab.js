@@ -10,6 +10,10 @@ const quickTable = (data) => {
 
 
 function probe(given) {
-  if (typeof given == 'function')  given = makeArr(10000, given)
-  quickTable(countUnique(given))
+  if (typeof given == 'function') {
+    if ( Array.isArray(given()) )  given = given()
+    else  given = makeArr(10000, given)
+  }
+  if ( Array.isArray(given) )  quickTable(countUnique(given))
+  else  quickTable(given)
 }

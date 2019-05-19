@@ -286,83 +286,189 @@ const origins = (num, options={}) => {
 }
 
 
+// generates records with {columns:2 or 1} of valid CSS-color names
+const colouring = (num, options={}) => {
+  const columns = options.columns || rnd(3)
 
-const colouring =num=> {
-  if (rnd(3)) return [[rnd(['color','favorite color','selected color',
-    'preferred color','color preference','color key'])],
-    flipNested([rnd(colors,num)])]
-  else return [rnd([['primary color','secondary color'],['main color',
-    'accent color'],['1st color','2nd color'],['first color','second color'],
-    ['color 1','color 2']]), flipNested([rnd(colors,num),rnd(colors,num)])]
+  if (columns == 2) {    // for 2 columns of colors
+    const headers = rnd( [['primary color','secondary color'],
+                      ['main color','accent color'], ['1st color','2nd color'],
+                      ['first color','second color'], ['color 1','color 2']] )
+    return [ headers, flipNested( [rnd(colors, num), rnd(colors, num)] ) ]
+  }
+  else {                // for 1 column of colors
+    const header = rnd( ['color','favorite color','selected color',
+                        'preferred color','color preference','color key'] )
+    return [ [header], flipNested( [rnd(colors, num)] ) ]
+  }
 }
-const makePoints =()=> {
-  const max=rnd(1,12)*10
-  return Math.min(rnd(1,max*1.7),max)+'/'+max
+
+
+// generates an array of [distinct] random combinations of "feature creature"
+const familiars = (num, distinct) =>
+  makeArr( num, ()=> rnd(features, creatures), distinct )
+
+
+// generates a string like "74/100" or "20/20"
+const makePoints = (options={}) => {
+  /* options may be like
+  {
+    exactCap: any positive integer,     // if provided other caps ignored
+    minCap: any positive integer,    // last digit auto-drops to 0, default:  10
+    maxCap: any positive integer,    // last digit auto-drops to 0, default: 120
+    fullPercentage: 1 to 100  // percentage of values equal to cap, default:  50
+  }   */
+
+  let { exactCap, minCap, maxCap, fullPercentage } = options
+  fullPercentage = fullPercentage || 50
+  // if no exact cap desired
+  if (!exactCap)  minCap = Math.floor(minCap / 10) || 1,
+                  maxCap = Math.floor(maxCap / 10) || 12
+
+  const cap = exactCap || rnd(minCap, maxCap) * 10,
+        multiplier = (100 - 100/cap) / (100 - fullPercentage)
+
+  const value = Math.min( rnd(1, cap * multiplier), cap )
+  return  value + '/' + cap
 }
-const familiars =(num,distinct)=>
-  makeArr(num,_=> rnd(features,creatures),distinct)
-const hitsManaStamina =num=> {
-  const hp = rnd(['life','hitpoints']), mana = rnd(['mana','magicka']),
-        preset = rnd(5), headers = [], columns = []
-  if (preset) headers.push(hp) && columns.push(makeArr(num,makePoints))
-  if (preset==2 || preset==3)
-    headers.push(mana) && columns.push(makeArr(num,makePoints))
-  if ([0,1,2].includes(preset))
-    headers.push('stamina') && columns.push(makeArr(num,makePoints))
-  return [headers,flipNested(columns)]
+
+
+// generates an array of records with hitpoints, mana, stamina
+const charPoints = (num, options={}) => {
+  /* options may be like
+  {
+    columns: 1, 2 or 3,     // number of columns desired
+    preset: 0, 1, 2 or 3    // alternative to columns property, options are:
+    // 0 - stamina, 1 - hp, stamina, 2 - hp, mana, stamina, 3 - hp, mana, 4 - hp
+  }     // in case of no options random preset is chosen      */
+
+  let { columns, preset } = options
+
+  if (!preset) {            // in case of no preset specified
+    if (!columns)  preset = rnd(5)
+    else  switch(columns) {  // choose preset according to the number of columns
+      case 1:  preset = rnd( [0, 4] );      break
+      case 2:  preset = rnd( [1, 3] );      break
+      case 3:  preset = 2
+    }
+  }
+  const hpHeader = rnd( ['life','hitpoints'] ),     // choosing the headers
+        manaHeader = rnd( ['mana','magicka'] ),
+        headers = [];  columns = []
+
+  if (preset)  headers.push(hpHeader),  columns.push( makeArr(num, makePoints) )
+  if (preset == 2 || preset == 3)
+             headers.push(manaHeader),  columns.push( makeArr(num, makePoints) )
+  if ( [0,1,2].includes(preset) )
+              headers.push('stamina'),  columns.push( makeArr(num, makePoints) )
+
+  return [ headers, flipNested(columns) ]
 }
-const quoting =num=> [[rnd(['motto','creed','code phrase','quote'])],
-  makeArr(num,_=>['"'+rnd(rnd(sonnets))
-    .replace(/[,?;:!\.]$|\.\.\.$|--$/,'')+rnd({'.':12,'!':3,'?':1})+'"'])]
-const makeAmount =max=> addCommas(rnd(1000)* 10**rnd(((max||1000)/100+'').length)+'')
-const scoring =num=> {
-  const score = rnd(['score','points total']),
+
+
+// generate an array of records with phrase excerpts from Shakespeare's sonnets
+const quoting = (num) => {
+  const header = rnd( ['motto', 'creed', 'code phrase', 'quote'] ),
+        rows = makeArr( num, ()=> ['"' + rnd( rnd(sonnets) )
+          .replace(/[,?;:!\.]$|\.\.\.$|--$/,  '')  // clean end punctuation sign
+            + rnd( {'.': 12, '!': 3, '?': 1} ) + '"'] )   // add another instead
+  return [ [header], rows ]
+}
+
+
+// generates a number with comma separated thousands with maximum digits length
+const makeAmount = (digits=4) =>
+  addCommas( rnd(1000) * 10**rnd(digits - 2) + '')
+
+
+// generates an array of records with scores
+const scoring = (num, options={}) => {
+  /* options may be like
+  {
+    columns: 1, 2 or 3,     // number of columns desired
+    preset: 0, 1, 2 or 3    // alternative to columns property, options are:
+    // 0 - won; 1 - score,won; 2 - score,won,tries; 3 - score,tries; 4 - tries
+  }     // in case of no options random preset is chosen      */
+
+  let { columns, preset } = options
+
+  if (!preset) {            // in case of no preset specified
+    if (!columns)  preset = rnd(5)
+    else  switch(columns) {  // choose preset according to the number of columns
+      case 1:  preset = rnd( [0, 4] );      break
+      case 2:  preset = rnd( [1, 3] );      break
+      case 3:  preset = 2
+    }
+  }
+  const score = rnd(['score','points total']),     // choosing the headers
         games = rnd(['rounds won','battles won']),
-        preset = rnd(5), headers = [], columns = []
+        headers = [];  columns = []
+
   if (preset)
-    headers.push(score) && columns.push(makeArr(num,_=>makeAmount(1e7)))
-  if ([0,1,2].includes(preset)) headers.push(games) &&
-    columns.push(makeArr(num,_=>rnd([rnd(1),rnd(50),rnd(300),rnd(1000)])))
-  if (preset==2 || preset==3) headers.push('tries before quitting') &&
-    columns.push(makeArr(num,_=>rnd([1,2,3,rnd(4,70),rnd(4,400)])))
-  return [headers,flipNested(columns)]
-}
-const accounting =num=> {
-  const preset = rnd(5), headers = [], columns = []
-  if (preset) headers.push('balance') &&
-    columns.push(makeArr(num,_=>'$'+[0,makeAmount(1e5)][rnd(92,'%')]+'.00'))
-  if ([0,1,2].includes(preset)) headers.push('income','spendings') &&
-    columns.push(makeArr(num,_=>{
-      const sum = [0,makeAmount(1e2)][rnd(83,'%')]
-      return (sum? '+':'')+'$'+sum+'.00'
-    }), makeArr(num,_=>{
-      const sum = [0,makeAmount(1e2)][rnd(83,'%')]
-      return (sum? '-':'')+'$'+sum+'.00'
-    }))
-  if (preset==2 || preset==3) headers.push('debt') &&
-    columns.push(makeArr(num,_=>'$'+[makeAmount(1e2),0][rnd(77,'%')]+'.00'))
-  return [headers,flipNested(columns)]
-}
-const createModify =num=> {
-  const year = 365.25*864e5
-  return [['created','modified'],makeArr(num,_=>{
-    const created = rnd(year)
-    return [standartDatetime(new Date(Date.now()-created)),
-            standartDatetime(new Date(Date.now()-rnd(created)))]
-  })]
-}
-const rndData =(cols=[3,20], rows=[100,500])=> {
-  if (typeof cols == 'number') cols = rnd(2,cols)
-  else cols = rnd(cols[0],cols[1])
-  if (typeof rows == 'number') rows = rnd(2,rows)
-  else rows = rnd(rows[0],rows[1])
-  // selectScheme()
-  // decideOptions()
-  // generateData()
+    headers.push(score),  columns.push( makeArr(num, ()=> makeAmount(8)) )
+  if ( [0,1,2].includes(preset) )  headers.push(games),
+    columns.push( makeArr(num, ()=> rnd( [rnd(1),rnd(50),rnd(300),rnd(1000)])) )
+  if (preset == 2 || preset == 3)  headers.push('tries before quitting'),
+    columns.push( makeArr(num, ()=> rnd( [1, 2, 3, rnd(4, 70), rnd(4, 400)] )) )
 
-  const wIds = rnd(80,'%')
-
+  return [ headers, flipNested(columns) ]
 }
+
+
+// generates an array of records with accounting numbers
+const accounting = (num, options={}) => {
+  /* options may be like
+  {
+    columns: 1, 2, 3 or 4,     // number of columns desired
+    preset: 0, 1, 2 or 3    // alternative to columns property, options are:
+    // 0 - income,spendings; 1 - balance,income,spendings; 2 - score,won,tries; 3 - score,tries; 4 - tries
+  }     // in case of no options random preset is chosen      */
+
+  let { columns, preset } = options
+
+  if (!preset) {            // in case of no preset specified
+    if (!columns)  preset = rnd(5)
+    else  switch(columns) {  // choose preset according to the number of columns
+      case 1:  preset = 4;                  break
+      case 2:  preset = rnd( [0, 3] );      break
+      case 3:  preset = 1;                  break
+      case 4:  preset = 2
+    }
+  }
+  const  headers = [];  columns = []
+
+  if (preset)  headers.push('balance'),
+    columns.push( makeArr(num, ()=> '$'+[0, makeAmount(7)][rnd(92,'%')]+'.00') )
+
+  if ( [0,1,2].includes(preset) )  headers.push('income','spendings'),
+    columns.push( makeArr(num, ()=> {
+      const sum = [0, makeAmount(5)][rnd(83,'%')]
+      return (sum? '+' : '') + '$' + sum + '.00'
+    }), makeArr(num, ()=> {
+      const sum = [0, makeAmount(5)][rnd(83,'%')]
+      return (sum? '-' : '') + '$' + sum + '.00'
+    }) )
+
+  if (preset == 2 || preset == 3)  headers.push('debt'),
+    columns.push( makeArr(num, ()=> '$'+[makeAmount(5), 0][rnd(77,'%')]+'.00') )
+
+  return [ headers, flipNested(columns) ]
+}
+
+
+// generate an array of records with adequate created/modifed datetimes
+const createModify = (num) => {
+  const year = 365.25*864e5,
+        rows = makeArr(num, ()=> {
+          const created = rnd(year)
+          return [ standartDatetime( new Date( Date.now() - created ) ),
+                   standartDatetime( new Date( Date.now() - rnd(created) ) ) ]
+        })
+  return [ ['created','modified'], rows ]
+}
+
+
+// generate an array of records with person information
 const persons = (num, options={}) => {
   let result = []
   const names = namesGenders(num, options),
@@ -376,7 +482,7 @@ const persons = (num, options={}) => {
         rColors = wColor? colouring(num) :0,
         wCreature = rnd(5),
         wPoints = !titled&&wCreature? rnd(5) :0,
-        rPoints = wPoints? hitsManaStamina(num) :0,
+        rPoints = wPoints? charPoints(num) :0,
         rAnimals = titled&&wCreature? [[rnd(['animal','totem',
           'totem animal','chosen animal'])],[rnd(animals,num)]] :0,
         rCreatures = !titled&&wCreature? [[rnd(['familiar','creature',
@@ -420,6 +526,9 @@ const persons = (num, options={}) => {
   result[1] = flipNested(result[1])
   return result
 }
-// console.table(recordsFrom(makeArr(10000,_=>persons(3)).reduce((max,cur)=>max[0].length>cur[0].length? max:cur, [[]])))
-// console.table(makeArr(10000,_=>persons(3)).reduce((counts,cur)=>{const count=''+cur[0].length;counts[count]=counts[count]?counts[count]+1:1;return counts},{}))
+
+
+
+
+
 // JSON.stringify(makeArr(10000,_=>persons(3)).reduce((counts,cur)=>{const count=''+cur[0].length;counts[count]=counts[count]?counts[count]+1:1;return counts},{}))
