@@ -1,6 +1,20 @@
 let rowsToMake = 100
 
-let [headers, rows] = persons(rowsToMake),
+// let [headers, rows] = persons(rowsToMake),
+let [headers, rows] = persons(rowsToMake, {
+  useId: 0,
+  naming: {
+    form: {
+      playful: {
+        nick1st:0,
+        quote:'*'
+      }
+    },
+    joined: 1
+  },
+  genders: 0,
+
+}),
     footers = headers
 
 

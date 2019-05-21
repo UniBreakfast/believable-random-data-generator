@@ -52,24 +52,35 @@ const lorem = {
 }
 
 // generates and array of unique identifiers by random or selected preset
-const ids = (num, preset, chars) => {
-  let pad = rnd(2),  // should number be padded with leading zeros?
+const ids = (num, options={}) => {
+  /* options may be like
+  {                        // omitted options are left to be chosen randomly
+    preset: 0, 1, 2 or 3     // exact scheme for ids, options are:
+            // 0 - letter/number combination, 1 - sequential integers,
+            // 2 - dispersed integers, 3 - dispersed integers with zero padding
+    chars: ['char1', 'char2']   // to wrap the number part in them
+  } */
+
+  let { preset, chars } = options
+  preset = (preset !== undefined)? preset : rnd(4)
+
+  // should number be padded with leading zeros?
+  let pad = (preset == 3) || rnd(2),
       more = rnd(2)  // should there be more zeros than needed?
 
   // chosen or random preset to generate id column by it
-  preset = (typeof preset != 'undefined')? preset : rnd(4)
 
   switch ( preset ) {
     case 1: return integers(1, num)   // just integers
 
     case 2: pad = 0       // integers with random density without zero padding
-    case 3: {                                             // with zero padding
+    case 3: {                                // with the possible zero padding
       const numbers = integers(1, num, rnd(10, 100)),
             padding = pad? String(numbers[num-1]).length : 1
       return numbers.map( int => String(int).padStart(padding,'0') ) }
 
     default:              // complex ids with letters and more
-      const padding = pad? String(num).length+more : 1,
+      const padding = pad?  String(num).length + more  :  1,
             letterSet = rnd( ['a-z', 'A-Z', 'a-'+rnd('b-z'), 'A-'+rnd('B-Z')] ),
             letters = countUnique( rnd(letterSet, num).sort() )
       chars = chars || rnd( [['-',''], ['.',''], ['(',')'], ['[',']'], ['','']])
@@ -91,12 +102,12 @@ const namesGenders = (num, options={}) => {
       nick1st or nickLast or nickIn or nickEnd: 1,          // nickname position
       quote: '**' or any 'string'        // character to wrap nickname if joined
     } },
-    gender: 0 or 1 or ['girl', 'boy'],     // alternative labels for male/female
+    genders: 0 or 1 or ['girl', 'boy'], // if alternative labels for male/female
     name1st: 0 or 1              // should the firtname go before/after the last
   } */
 
   // preparations section: setting the variables for the generation process
-  let { joined, form, gender, name1st } = options
+  let { joined, form, genders, name1st } = options
 
   // decide on form of naming and the context of data generated
   const males = rnd(30, 70),   // male/female percentage
@@ -105,15 +116,15 @@ const namesGenders = (num, options={}) => {
           form : { [form || rnd(['playful', 'formal', 'casual'], 'lower')]: 1 }
   // should the first/last names go together
   joined = (joined == undefined)? rnd(2) : joined  // first/lastname in one cell
-  gender = (gender == undefined)? rnd(2) : gender  // should there be gender
+  genders = (genders == undefined)? rnd(2) : genders  // should there be gender
   name1st = (playful && joined)? 1 : (name1st == undefined)? rnd(2) : name1st
 
   if (joined)  var nameAbbr = (joined.nameAbbr == undefined)?
     rnd(25,'%') : joined.nameAbbr   // should there be just the initials
   else  var naming = rnd(3)  // choosing naming combinations for name columns
 
-  if (gender)  var [f, m] = Array.isArray(gender)?   // words for genders
-    gender : [['female', 'male'], ['F', 'M']][ rnd(35, '%') ]
+  if (genders)  var [f, m] = Array.isArray(genders)?   // words for genders
+    genders : [['female', 'male'], ['F', 'M']][ rnd(35, '%') ]
 
   if (formal)  var [dr, mr, mrs, miss] =      // abbreviations for titles
     rnd( [['Dr.', 'Mr.', 'Mrs.', 'Miss'], ['dr.', 'mr.', 'mrs.', 'miss']] )
@@ -149,7 +160,7 @@ const namesGenders = (num, options={}) => {
   }
   if (nickLast)
     headers.push( rnd(['nick', 'nickname', 'nickname', 'alias', 'callsign']) )
-  if (gender)  headers.push('gender')
+  if (genders)  headers.push('gender')
 
   const rows = makeArr(num, ()=> {
     // prepare variables for each row
@@ -177,7 +188,7 @@ const namesGenders = (num, options={}) => {
       if (!name1st)  row.push(first)
     }
     if (nickLast)  row.push(nick)
-    if (gender)  row.push( [f, m][male] )
+    if (genders)  row.push( [f, m][male] )
 
     return row
   })
@@ -344,7 +355,7 @@ const charPoints = (num, options={}) => {
 
   let { columns, preset } = options
 
-  if (!preset) {            // in case of no preset specified
+  if (preset === undefined) {            // in case of no preset specified
     if (!columns)  preset = rnd(5)
     else  switch(columns) {  // choose preset according to the number of columns
       case 1:  preset = rnd( [0, 4] );      break
@@ -392,7 +403,7 @@ const scoring = (num, options={}) => {
 
   let { columns, preset } = options
 
-  if (!preset) {            // in case of no preset specified
+  if (preset === undefined) {            // in case of no preset specified
     if (!columns)  preset = rnd(5)
     else  switch(columns) {  // choose preset according to the number of columns
       case 1:  preset = rnd( [0, 4] );      break
@@ -426,7 +437,7 @@ const accounting = (num, options={}) => {
 
   let { columns, preset } = options
 
-  if (!preset) {            // in case of no preset specified
+  if (preset === undefined) {            // in case of no preset specified
     if (!columns)  preset = rnd(5)
     else  switch(columns) {  // choose preset according to the number of columns
       case 1:  preset = 4;                  break
@@ -470,12 +481,20 @@ const createModify = (num) => {
 
 // generate an array of records with person information
 const persons = (num, options={}) => {
+
+  let { randomRest, useId, naming, genders, birthdays, age } = options
+
+  useId = (useId !== undefined)? useId : rnd(5)
+
+  if (!naming)  naming = {}
+  if (!naming.form)  naming.form = rnd(['playful', 'formal', 'casual'], 'lower')
+
+  if (birthdays === undefined && age === undefined)  var birth_or_age = rnd(5)
+
   let result = []
-  const names = namesGenders(num, options),
+  const names = namesGenders( num, {...naming, genders} ),
         titled = names[1][0].reduce((titled,el)=> titled?true : !!el
                   .match(/mr\.|mrs\.|miss|dr\./i),0),
-        wIds = rnd(5),
-        wBirthAge = rnd(5),
         wOrigin = rnd(5),
         rOrigin = wOrigin? origins(num) :0,
         wColor = rnd(5),
@@ -504,10 +523,12 @@ const persons = (num, options={}) => {
         rLoremP = wLoremP? [[rnd(['character bio','story']),rnd(['details',
           'description'])][+titled],makeArr(num,_=>[lorem.paragraph(22,222)])]:0
 
-  if (wIds) result.push([['id'],[ids(num)]])
+  if (useId) result.push([['id'],[ids(num, useId)]])
   result.push([names[0],flipNested(names[1])])
-  if (wBirthAge) {
-    const birth_age = birthAge(num)
+  if (birthdays || age || birth_or_age) {
+    const options = birth_or_age? {}
+                      : { ...birthdays, ...age, birthday: birthdays, age },
+          birth_age = birthAge(num, options)
     result.push([birth_age[0],flipNested(birth_age[1])])
   }
   if (wOrigin) result.push([rOrigin[0],flipNested(rOrigin[1])])
