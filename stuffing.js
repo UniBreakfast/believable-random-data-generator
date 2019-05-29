@@ -170,13 +170,13 @@ const namesGenders = (num, options={}) => {
     if (nameAbbr)  first = first[0]+'.'
     // nickname preparation
     if (playful)  var nick = nicksArr.pop()
-    if (nickIn || nickEnd)  var _nick_ = quote + nick + quote
+    if (nickIn || nickEnd || playful.quote)  var _nick_ = quote + nick + quote
     // choice of the right title
     if (formal)  var title = !rnd(20)? dr : male? mr : rnd(3)? mrs : miss
 
     const row = []
 
-    if (nick1st)  row.push(nick)
+    if (nick1st)  row.push(_nick_ || nick)
     // adds joined full name in format selected by various variables
     if (joined)  row.push( (title? title+' ' : '') + (name1st? first+' ' : '')
       + (nickIn? _nick_+' ' : '') + last + (!name1st? ', '+first : '')
@@ -187,7 +187,7 @@ const namesGenders = (num, options={}) => {
       row.push(last)
       if (!name1st)  row.push(first)
     }
-    if (nickLast)  row.push(nick)
+    if (nickLast)  row.push(_nick_ || nick)
     if (genders)  row.push( [f, m][male] )
 
     return row
@@ -255,6 +255,7 @@ const birthAge = (num, options={}) => {
 const origins = (num, options={}) => {
   /* options may be like
   {
+    columns: 1 or 2,    // if only the number matters
     joined: 1 or 0,     // should city and country go in one field
     city: 1 or 0,                 // show or don't show the cities
     country: 1 or 0,              // show or don't show countries
@@ -263,9 +264,14 @@ const origins = (num, options={}) => {
                 // 0 - country, 1 - "city, country", 2 - city, country, 3 - city
   }     // in case of no options random preset      */
 
-  let { joined, city, country, preset } = options,
+  let { columns, joined, city, country, preset } = options,
       // should city column go before country
       city1st = !joined && rnd(2)
+
+  if (columns) {   // in case if preset choice depends on the number of columns
+    if      (columns == 1)  preset = rnd([0, 3])
+    else if (columns == 2)  preset = 2
+  }
 
   preset = (preset === undefined)? rnd(4) : preset
   // 0 - country, 1 - "city, country", 2 - city, country, 3 - city
@@ -408,7 +414,7 @@ const scoring = (num, options={}) => {
     else  switch(columns) {  // choose preset according to the number of columns
       case 1:  preset = rnd( [0, 4] );      break
       case 2:  preset = rnd( [1, 3] );      break
-      case 3:  preset = 2
+      default:  preset = 2
     }
   }
   const score = rnd(['score','points total']),     // choosing the headers
@@ -443,7 +449,7 @@ const accounting = (num, options={}) => {
       case 1:  preset = 4;                  break
       case 2:  preset = rnd( [0, 3] );      break
       case 3:  preset = 1;                  break
-      case 4:  preset = 2
+      default:  preset = 2
     }
   }
   const  headers = [];  columns = []
@@ -482,68 +488,150 @@ const createModify = (num) => {
 // generate an array of records with person information
 const persons = (num, options={}) => {
 
-  let { randomRest, useId, naming, genders, birthdays, age } = options
+  if (options.omitRest)  options = { useId: 0, genders: 0, birthdays: 0,
+    age: 0, origin: 0, status: 0, colors: 0, creatures: 0, points: 0,
+    quote: 0, account: 0, scores: 0, sentence: 0, paragraph: 0, timestamp: 0,
+    ...options }
 
-  useId = (useId !== undefined)? useId : rnd(5)
+  let { omitRest, useId, naming, genders, birthdays, age, origin, status,
+    colors, creatures, points, quote, account, scores, sentence, paragraph,
+    timestamp } = options
 
   if (!naming)  naming = {}
   if (!naming.form)  naming.form = rnd(['playful', 'formal', 'casual'], 'lower')
 
-  if (birthdays === undefined && age === undefined)  var birth_or_age = rnd(5)
+  if (!omitRest) {
+    if (useId === undefined)  useId = rnd(5)
+
+    if (birthdays === undefined) {
+      if (age === undefined)  var birth_or_age = rnd(5)
+      else  birthdays = rnd(3)
+    }
+    else if (age === undefined)  age = rnd(6)
+
+    if (origin === undefined)  origin = rnd(5)
+    if (status === undefined)  status = rnd(2)
+    if (colors === undefined)  colors = rnd(5)
+
+    if (creatures === undefined || !creatures.animals && !creatures.fantasy) {
+      if (naming.form == 'playful' || naming.form.playful) {
+        if ( rnd(5) )  creatures = {fantasy: creatures || 1 + !rnd(4)}
+      }
+      if (naming.form == 'casual' || naming.form.casual) {
+        if ( rnd(5) )  creatures = {animals: creatures || 1 + !rnd(4)}
+      }
+    }
+
+    if (points === undefined
+      && ( naming.form == 'playful' || naming.form.playful ))  points = rnd(5)
+
+    if (quote === undefined)  quote = rnd(5)
+
+    if (account === undefined && ( ['formal', 'casual'].includes(naming.form) || naming.form.formal || naming.form.casual ) )  account = rnd(5)
+
+    if (scores === undefined
+      && ( naming.form == 'playful' || naming.form.playful ))  scores = rnd(5)
+
+    if (sentence  === undefined)  sentence  =  rnd(3)
+    if (paragraph === undefined)  paragraph = !rnd(5)
+    if (timestamp === undefined)  timestamp =  rnd(7)
+  }
 
   let result = []
-  const names = namesGenders( num, {...naming, genders} ),
-        titled = names[1][0].reduce((titled,el)=> titled?true : !!el
-                  .match(/mr\.|mrs\.|miss|dr\./i),0),
-        wOrigin = rnd(5),
-        rOrigin = wOrigin? origins(num) :0,
-        wColor = rnd(5),
-        rColors = wColor? colouring(num) :0,
-        wCreature = rnd(5),
-        wPoints = !titled&&wCreature? rnd(5) :0,
-        rPoints = wPoints? charPoints(num) :0,
-        rAnimals = titled&&wCreature? [[rnd(['animal','totem',
-          'totem animal','chosen animal'])],[rnd(animals,num)]] :0,
-        rCreatures = !titled&&wCreature? [[rnd(['familiar','creature',
-          'character','playing character'])],[familiars(num,1)]] :0,
-        rCreatures2 = rCreatures&&rCreatures[0][0]=='playing character'?
-          [['reserve character'],[familiars(num,1)]] :0,
-        wQuote = rnd(5),
-        rQuote = wQuote? quoting(num) :0,
-        wStatus = rnd(2),
-        rStatus = [['status'],[rnd({'':9,'active':3,'inactive':1,'left':1,'done':2,'quit':1,'deceased':1},num)]],
-        wAmount = rnd(5),
-        rAmount = !wAmount? 0: (titled? accounting(num) : scoring(num)),
-        wCreateModify = rnd(7),
-        rCreateModify = wCreateModify? createModify(num) :0,
-        wLoremS = rnd(3),
-        rLoremS = wLoremS? [['spell','proverb'][+titled], makeArr(num,_=>
-          [lorem.sentence(2,22)])] :0,
-        wLoremP = !rnd(5),
-        rLoremP = wLoremP? [[rnd(['character bio','story']),rnd(['details',
-          'description'])][+titled],makeArr(num,_=>[lorem.paragraph(22,222)])]:0
 
   if (useId) result.push([['id'],[ids(num, useId)]])
+
+  const names = namesGenders( num, {...naming, genders} )
   result.push([names[0],flipNested(names[1])])
+
   if (birthdays || age || birth_or_age) {
     const options = birth_or_age? {}
                       : { ...birthdays, ...age, birthday: birthdays, age },
           birth_age = birthAge(num, options)
-    result.push([birth_age[0],flipNested(birth_age[1])])
+    result.push( [ birth_age[0], flipNested(birth_age[1]) ] )
   }
-  if (wOrigin) result.push([rOrigin[0],flipNested(rOrigin[1])])
-  if (wStatus) result.push(rStatus)
-  if (wColor) result.push([rColors[0],flipNested(rColors[1])])
-  if (wCreature) result.push(titled? rAnimals : rCreatures)
-  if (rCreatures2) result.push(rCreatures2)
-  if (wPoints) result.push([rPoints[0],flipNested(rPoints[1])])
-  if (rQuote) result.push([rQuote[0],flipNested(rQuote[1])])
-  if (wAmount) result.push([rAmount[0],flipNested(rAmount[1])])
-  if (wLoremS) result.push([rLoremS[0],flipNested(rLoremS[1])])
-  if (wLoremP) result.push([rLoremP[0],flipNested(rLoremP[1])])
-  if (wCreateModify) result.push([rCreateModify[0],flipNested(rCreateModify[1])])
-  result = flipNested(result)
-  result = result.map(arr=>arr.flat())
+
+  if (origin) {
+    if (typeof origin == 'number')  origin = {columns: origin}
+    const generated = origins(num, origin)
+    result.push( [ generated[0], flipNested(generated[1]) ] )
+  }
+
+  if (status)  result.push( [ ['status'], [ rnd( {'':9, 'active':3,
+    'inactive':1, 'left':1, 'done':2, 'quit':1, 'deceased':1}, num ) ] ] )
+
+  if (colors) {
+    if (typeof colors == 'number')  colors = {columns: colors}
+    const generated = colouring(num, colors)
+    result.push( [ generated[0], flipNested(generated[1]) ] )
+  }
+
+  if (creatures) {
+    const { fantasy, fauna } = creatures
+
+    if (fantasy) {
+      // in case of two columns
+      if (fantasy == 2)  result.push( [ ['playing character',
+        'reserve character'], [familiars(num, 1), familiars(num, 1)] ] )
+      // in case of one column
+      else  result.push( [ [rnd( ['familiar', 'creature', 'character'] )],
+        [familiars(num, 1)] ] )
+    }
+
+    if (fauna) {
+      // in case of two columns
+      if (fauna == 2)  result.push( [ ['animal 1', 'animal 2'],
+        [rnd(animals, num), rnd(animals, num)] ] )
+      // in case of one column
+      else  result.push( [ [rnd( ['animal', 'totem', 'totem animal',
+      'chosen animal'] )], [rnd(animals, num)] ] )
+    }
+  }
+
+  if (points) {
+    if (typeof points == 'number')  points = {columns: points}
+    const generated = charPoints(num, points)
+    result.push( [ generated[0], flipNested(generated[1]) ] )
+  }
+
+  if (quote) {
+    const generated = quoting(num, points)
+    result.push( [ generated[0], flipNested(generated[1]) ] )
+  }
+
+  if (account) {
+    if (typeof account == 'number')  account = {columns: account}
+    const generated = accounting(num, account)
+    result.push( [ generated[0], flipNested(generated[1]) ] )
+  }
+
+  if (scores) {
+    if (typeof scores == 'number')  scores = {columns: scores}
+    const generated = scoring(num, scores)
+    result.push( [ generated[0], flipNested(generated[1]) ] )
+  }
+
+  if (sentence) {
+    const header = (naming.form.playful || naming.form == 'playful')?
+          rnd( ['', 'arcane','ancient','favorite','lorem'], ['spell','curse'] )
+          : rnd( ['','lorem','fake','proverbial'], ['proverb'] )
+          generated = [ [header], makeArr(num, ()=> [ lorem.sentence(2, 22) ]) ]
+    result.push( [ generated[0], flipNested(generated[1]) ] )
+  }
+
+  if (paragraph) {
+    const header = (naming.form.playful || naming.form == 'playful')?
+          rnd( ['character bio', 'story'] ) : rnd( ['dossier', 'profile'] )
+          generated = [[header], makeArr(num, ()=> [lorem.paragraph(22, 222)] )]
+    result.push( [ generated[0], flipNested(generated[1]) ] )
+  }
+
+  if (timestamp) {
+    const generated = createModify(num)
+    result.push( [ generated[0], flipNested(generated[1]) ] )
+  }
+
+  result = flipNested(result).map(arr=>arr.flat())
   result[1] = flipNested(result[1])
   return result
 }
