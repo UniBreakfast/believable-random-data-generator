@@ -83,6 +83,7 @@ const ids = (num, options={}) => {
       const padding = pad?  String(num).length + more  :  1,
             letterSet = rnd( ['a-z', 'A-Z', 'a-'+rnd('b-z'), 'A-'+rnd('B-Z')] ),
             letters = countUnique( rnd(letterSet, num).sort() )
+      // chars to wrap the number part in them
       chars = chars || rnd( [['-',''], ['.',''], ['(',')'], ['[',']'], ['','']])
       return Object.entries(letters)
         .map( ([key, value]) => integers( 1, value, rnd(10, 100) )
@@ -170,7 +171,8 @@ const namesGenders = (num, options={}) => {
     if (nameAbbr)  first = first[0]+'.'
     // nickname preparation
     if (playful)  var nick = nicksArr.pop()
-    if (nickIn || nickEnd || playful.quote)  var _nick_ = quote + nick + quote
+    if (nickIn || nickEnd || playful && playful.quote)
+      var _nick_ = quote + nick + quote
     // choice of the right title
     if (formal)  var title = !rnd(20)? dr : male? mr : rnd(3)? mrs : miss
 
@@ -366,7 +368,7 @@ const charPoints = (num, options={}) => {
     else  switch(columns) {  // choose preset according to the number of columns
       case 1:  preset = rnd( [0, 4] );      break
       case 2:  preset = rnd( [1, 3] );      break
-      case 3:  preset = 2
+      default: preset = 2
     }
   }
   const hpHeader = rnd( ['life','hitpoints'] ),     // choosing the headers
@@ -488,70 +490,86 @@ const createModify = (num) => {
 // generate an array of records with person information
 const persons = (num, options={}) => {
 
-  if (options.omitRest)  options = { useId: 0, genders: 0, birthdays: 0,
-    age: 0, origin: 0, status: 0, colors: 0, creatures: 0, points: 0,
-    quote: 0, account: 0, scores: 0, sentence: 0, paragraph: 0, timestamp: 0,
-    ...options }
-
-  let { omitRest, useId, naming, genders, birthdays, age, origin, status,
+  let { omitRest, useId, naming={}, genders, birthdays, age, origin, status,
     colors, creatures, points, quote, account, scores, sentence, paragraph,
     timestamp } = options
 
-  if (!naming)  naming = {}
+  // style selection in case in wasn't selected explicitly (playful more often)
   if (!naming.form)  naming.form = rnd(['playful', 'formal', 'casual'], 'lower')
 
-  if (!omitRest) {
-    if (useId === undefined)  useId = rnd(5)
+  // in case if omitted options really should not be selected
+  if (omitRest)  genders = (genders === undefined)? 0 : genders
+
+  else {  // but in general case omitted options are randomly selected
+
+    if (useId === undefined)  useId = rnd(5)  // should there be ids
 
     if (birthdays === undefined) {
+      // should birthday and/or age columns be chosen randomly
       if (age === undefined)  var birth_or_age = rnd(5)
-      else  birthdays = rnd(3)
-    }
+      else  birthdays = rnd(3)    // or decide just on birthdays column
+    }                   // or decide just if there should be age column
     else if (age === undefined)  age = rnd(6)
 
+    // should there be city and/or country columns
     if (origin === undefined)  origin = rnd(5)
-    if (status === undefined)  status = rnd(2)
+
+    if (status === undefined)  status = rnd(2)  // should there be statuses
+
+    // should there be colors column(s)
     if (colors === undefined)  colors = rnd(5)
 
-    if (creatures === undefined || !creatures.animals && !creatures.fantasy) {
+    // should there be columns with creatures (animals or fantasy things)
+    if (creatures === undefined || !creatures.fauna && !creatures.fantasy) {
+
+      if (naming.form == 'casual' || naming.form.casual) {
+        if ( rnd(5) )  creatures = {fauna: creatures || 1 + !rnd(4)}
+      }  // in case casual style chosen have animals (1, 2 or random number)
+
       if (naming.form == 'playful' || naming.form.playful) {
         if ( rnd(5) )  creatures = {fantasy: creatures || 1 + !rnd(4)}
-      }
-      if (naming.form == 'casual' || naming.form.casual) {
-        if ( rnd(5) )  creatures = {animals: creatures || 1 + !rnd(4)}
-      }
+      }  // in case playful style chosen have fantasy creatures (1, 2 or random)
     }
 
-    if (points === undefined
+    if (points === undefined         // should there be hitpoints, mana, stamina
       && ( naming.form == 'playful' || naming.form.playful ))  points = rnd(5)
 
-    if (quote === undefined)  quote = rnd(5)
+    if (quote === undefined)  quote = rnd(5)     // should there be quote column
 
+    // include accounting information if formal or casual style selected
     if (account === undefined && ( ['formal', 'casual'].includes(naming.form) || naming.form.formal || naming.form.casual ) )  account = rnd(5)
 
-    if (scores === undefined
+    if (scores === undefined      // should there be highscore, game stats etc.
       && ( naming.form == 'playful' || naming.form.playful ))  scores = rnd(5)
 
+    // should there be lorem ipsum sentence of pseudo words
     if (sentence  === undefined)  sentence  =  rnd(3)
+
+    // should there be lorem ipsum paragraph of pseudo text
     if (paragraph === undefined)  paragraph = !rnd(5)
+
+    // should there be creaded and modified datetime columns
     if (timestamp === undefined)  timestamp =  rnd(7)
   }
 
-  let result = []
+  let result = []     // array for gradual assembly of result records arrays
 
-  if (useId) result.push([['id'],[ids(num, useId)]])
+  // accumulate the headers/rows parts according to options selected
+
+  if (useId) result.push( [ ['id'], [ids(num, useId)] ] )
 
   const names = namesGenders( num, {...naming, genders} )
-  result.push([names[0],flipNested(names[1])])
+  result.push( [names[0], flipNested(names[1])] )
 
   if (birthdays || age || birth_or_age) {
-    const options = birth_or_age? {}
-                      : { ...birthdays, ...age, birthday: birthdays, age },
+    const options = birth_or_age? {}           // random choice of columns
+      : { ...birthdays, ...age, birthday: birthdays, age }, // or explicit
           birth_age = birthAge(num, options)
     result.push( [ birth_age[0], flipNested(birth_age[1]) ] )
   }
 
   if (origin) {
+    // pass the columns number if chosen without sub-options
     if (typeof origin == 'number')  origin = {columns: origin}
     const generated = origins(num, origin)
     result.push( [ generated[0], flipNested(generated[1]) ] )
@@ -561,6 +579,7 @@ const persons = (num, options={}) => {
     'inactive':1, 'left':1, 'done':2, 'quit':1, 'deceased':1}, num ) ] ] )
 
   if (colors) {
+    // pass the columns number if chosen without sub-options
     if (typeof colors == 'number')  colors = {columns: colors}
     const generated = colouring(num, colors)
     result.push( [ generated[0], flipNested(generated[1]) ] )
@@ -589,6 +608,7 @@ const persons = (num, options={}) => {
   }
 
   if (points) {
+    // pass the columns number if chosen without sub-options
     if (typeof points == 'number')  points = {columns: points}
     const generated = charPoints(num, points)
     result.push( [ generated[0], flipNested(generated[1]) ] )
@@ -600,18 +620,21 @@ const persons = (num, options={}) => {
   }
 
   if (account) {
+    // pass the columns number if chosen without sub-options
     if (typeof account == 'number')  account = {columns: account}
     const generated = accounting(num, account)
     result.push( [ generated[0], flipNested(generated[1]) ] )
   }
 
   if (scores) {
+    // pass the columns number if chosen without sub-options
     if (typeof scores == 'number')  scores = {columns: scores}
     const generated = scoring(num, scores)
     result.push( [ generated[0], flipNested(generated[1]) ] )
   }
 
   if (sentence) {
+    // different headers (only) for playful or formal and casual style
     const header = (naming.form.playful || naming.form == 'playful')?
           rnd( ['', 'arcane','ancient','favorite','lorem'], ['spell','curse'] )
           : rnd( ['','lorem','fake','proverbial'], ['proverb'] )
@@ -620,6 +643,7 @@ const persons = (num, options={}) => {
   }
 
   if (paragraph) {
+    // different headers (only) for playful or formal and casual style
     const header = (naming.form.playful || naming.form == 'playful')?
           rnd( ['character bio', 'story'] ) : rnd( ['dossier', 'profile'] )
           generated = [[header], makeArr(num, ()=> [lorem.paragraph(22, 222)] )]
@@ -631,13 +655,10 @@ const persons = (num, options={}) => {
     result.push( [ generated[0], flipNested(generated[1]) ] )
   }
 
-  result = flipNested(result).map(arr=>arr.flat())
-  result[1] = flipNested(result[1])
+  result = flipNested(result).map(arr=>arr.flat())     // flip and group results
+  result[1] = flipNested(result[1])   // flip columns into rows (make "records")
   return result
 }
 
-
-
-
-
-// JSON.stringify(makeArr(10000,_=>persons(3)).reduce((counts,cur)=>{const count=''+cur[0].length;counts[count]=counts[count]?counts[count]+1:1;return counts},{}))
+// random spread for different numbers of columns - copy and run in console
+// probe(makeArr(10000,_=>persons(1)).reduce((counts,cur)=>{const count=''+cur[0].length;counts[count]=counts[count]?counts[count]+1:1;return counts},{}))

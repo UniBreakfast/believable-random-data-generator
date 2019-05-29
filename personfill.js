@@ -2,33 +2,34 @@ let rowsToMake = 100
 
 // let [headers, rows] = persons(rowsToMake),
 let [headers, rows] = persons(rowsToMake, {
-  useId: 1,
-  naming: {
-    form: {
-      playful: {
-        nickLast: 1,
-        quote:' ~ '
-      }
-    },
-    joined: 0
-  },
-  genders: 1,
-  birthdays: 1,
-  age: 1,
-  origin: 1,
-  status: 1,
-  colors: 2,
+  // omitRest: 1,
+  // useId: 1,
+  // naming: {
+  //   form: {
+  //     playful: {
+  //       nickLast: 1,
+  //       quote:' ~ '
+  //     }
+  //   },
+  //   joined: 0
+  // },
+  // genders: 1,
+  // birthdays: 1,
+  // age: 1,
+  // origin: 1,
+  // status: 1,
+  // colors: 2,
   creatures: {
     fauna: 2,
     fantasy: 2
   },
-  points: 3,
-  quote: 1,
-  account: 4,
-  scores: 3,
-  sentence: 1,
-  paragraph: 1,
-  timestamp: 1
+  // points: 3,
+  // quote: 1,
+  // account: 4,
+  // scores: 3,
+  // sentence: 1,
+  // paragraph: 1,
+  // timestamp: 1
 
 }),
     footers = headers
