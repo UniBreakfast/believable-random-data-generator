@@ -2,36 +2,17 @@ let rowsToMake = 100
 
 // let [headers, rows] = persons(rowsToMake),
 let [headers, rows] = persons(rowsToMake, {
-  // omitRest: 1,
-  // useId: 1,
-  // naming: {
-  //   form: {
-  //     playful: {
-  //       nickLast: 1,
-  //       quote:' ~ '
-  //     }
-  //   },
-  //   joined: 0
-  // },
-  // genders: 1,
-  // birthdays: 1,
-  // age: 1,
-  // origin: 1,
-  // status: 1,
-  // colors: 2,
-  creatures: {
-    fauna: 2,
-    fantasy: 2
-  },
-  // points: 3,
-  // quote: 1,
-  // account: 4,
-  // scores: 3,
-  // sentence: 1,
-  // paragraph: 1,
-  // timestamp: 1
-
-}),
+  omitRest: 1,
+  useId: { preset: 0, chars: ['-',''] },
+  naming: { form: 'playful', joined: 1 }, genders: 1,
+  birthdays: 1, age: 1,
+  origin: { joined: 1 },
+  status: 1, colors: 1,
+  creatures: { fantasy: 2, fauna: 1 },
+  points: 3, quote: 1,
+  scores: 3, sentence: 1,
+  timestamp: 1
+} ),
     footers = headers
 
 

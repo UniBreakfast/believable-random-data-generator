@@ -1064,6 +1064,7 @@ const features =
   sonic,soul,sour,space,spark,spectral,spiked,spirit,star,static,steam,steel,
   stone,storm,story,strange,sturdy,sugar,sulphur,sun,swamp,sweet,terrible,
   thunder,time,tin,topaz,torchwood,troubled,true,twin,twisted,unbreakable,
+  dubious,eerie,scary,spooky,
   unchained,undead,vacant,vague,vapor,venom,vermillion,vicious,vile,violent,
   void,war,warped,water,wax,weird,white,wild,wind,winged,wire,wise,wonder,wood`
   .split(/,\s*/)
