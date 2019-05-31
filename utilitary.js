@@ -85,8 +85,9 @@ const conTbl = (data) => {
 
 
 // counts distinct array elements and returns an object with stats
-const countUnique = (arr) => {
-  arr =  (typeof arr[0] == 'number')?  arr.sort( (a, b)=> a - b )  :  arr.sort()
+const countUnique = (arr, noSort) => {
+  if (!noSort)  arr = (typeof arr[0] == 'number')?
+                  arr.sort( (a, b)=> a - b )  :  arr.sort()
   const obj = {}
   arr.forEach( item =>  obj[item] = 1 + (obj[item] || 0) )
   return obj

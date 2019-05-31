@@ -1,0 +1,55 @@
+<style>
+  body>div {
+    display: grid;
+    width: 1080px;
+    grid-template-columns: 80px auto;
+    gap: 1px;
+  }
+  body>div>span:nth-child(odd) {
+    text-align: right;
+  }
+  body>div>span:nth-child(even) {
+    background: brown;
+    height: 20px;
+  }
+</style>
+
+<div>
+  <span title=12>alpha</span>  <span title=12 style=width:120></span>
+  <span title=88>beta</span>   <span title=88 style=width:880></span>
+  <span title=100>delta</span> <span title=100 style=width:1000></span>
+  <span title=0>gamma</span>   <span title=0 style=width:0></span>
+</div>
+
+<script>
+  function visualize(data) {
+    if ( !Array.isArray(data) )  data = Object.entries(data)
+    try { data = data.sort( (a, b) => a[0] - b[0] ) } catch {}
+
+    const width = 1080,  namesWidth = 80,  barsWidth = 1000,
+          height = 700,  barsHeight = 20,
+          maxNum = Math.max( ...data.map(row => row[1]) ),
+          unitSize = barsWidth / maxNum,
+          calcWidth = (num) => Math.floor(num * unitSize)
+          style = `<style>
+                     body>div {
+                       display: grid;
+                       width: ${ width }px;
+                       grid-template-columns: ${ namesWidth }px auto;
+                       gap: 1px;
+                     }
+                     body>div>span:nth-child(odd) {
+                       text-align: right;
+                     }
+                     body>div>span:nth-child(even) {
+                       background: brown;
+                       height: ${ barsHeight }px;
+                     }
+                   </style>`
+    let html = data.reduce( (html, row)=>
+      html + `<span title=${ row[1] }>${ row[0] }</span>` +
+      `<span title=${ row[1] } style=width:${ calcWidth(row[1]) }></span>`, '')
+
+    document.body.innerHTML = style + `<div> ${ html } </div>`
+  }
+</script>

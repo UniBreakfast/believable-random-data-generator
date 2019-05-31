@@ -2,7 +2,7 @@ let rowsToMake = 100
 
 // let [headers, rows] = persons(rowsToMake),
 let [headers, rows] = persons(rowsToMake, {
-  omitRest: 1,
+  /* omitRest: 1,
   useId: { preset: 0, chars: ['-',''] },
   naming: { form: 'playful', joined: 1 }, genders: 1,
   birthdays: 1, age: 1,
@@ -11,7 +11,7 @@ let [headers, rows] = persons(rowsToMake, {
   creatures: { fantasy: 2, fauna: 1 },
   points: 3, quote: 1,
   scores: 3, sentence: 1,
-  timestamp: 1
+  timestamp: 1 */
 } ),
     footers = headers
 
