@@ -1,8 +1,0 @@
-.sTable {border-right-width: 2px}
-.sTable thead th {border-bottom-width: 2px}
-.sTable tfoot tr>* {border-top-width: 2px}
-.sTable th:first-child {border-right-width: 2px}
-.sTable tr>*:last-child {border-right-width: 0}
-.sTable tbody tr:first-child>* {border-top-width: 0}
-.sTable tbody tr:last-child>* {border-bottom-width: 0}
-.sTable tr>*:nth-child(2) {border-left-width: 0}
