@@ -88,3 +88,30 @@ const quickTable = (data) => {
 // like the probe function above, just preloaded with the quickTable presenter
 const probeTbl = (given, options) =>
                           probe(given, {...options, presenter: quickTable})
+
+
+// shorthand for console.table with transformations it may need taken care of
+const conTbl = (data) => {
+
+  // in case the data is an object
+  if (!Array.isArray(data)  &&  typeof data == 'object') {
+    // in case the data is a records object
+    if (data.headers && data.rows && Object.keys(data).length==2)
+      conTbl(recordsAsArray(data))
+    else console.table(data)  // in case data is ready for console.table
+  }
+
+  // in case the data is a valid records array
+  else if (typeof data[0][0] == 'string' && Array.isArray(data[1][0]))
+    console.table(objectifyRecords(data))
+
+  // in case the data is a flat array
+  else if (Array.isArray(data) && typeof data[0] != 'object')
+    console.table(data)
+
+  // in case the data is a nested rows array without the headers
+  else {
+    const headers = Array(data[0].length).fill(0).map((_,i)=>`column${i+1}`)
+    console.table( objectifyRecords([headers, data]) )
+  }
+}

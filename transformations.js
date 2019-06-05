@@ -60,7 +60,7 @@ const arrayifyRecords = (data, vary) => {
       ...
     ]
   ]
-  which occupies less space in memory, JSON and takes less traffic */
+  which occupies less space in memory or JSON and takes less traffic */
   if (vary) {
     // if record objects may have different properties
     const headers = Array.from( data.reduce( (headers, row) => {

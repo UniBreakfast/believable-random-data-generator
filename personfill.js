@@ -17,7 +17,7 @@ let [headers, rows] = persons(rowsToMake, {
     tbl = document.querySelector('.sTable').children[0]
 
 // renderTable(tbl, headers, rows, footers)
-renderTableWithColors(tbl, headers, rows, footers)
+renderTableBetter(tbl, headers, rows, footers)
 
 
 function renderTable(tbl, headers, rows, footers=headers) {
@@ -37,8 +37,8 @@ function renderTable(tbl, headers, rows, footers=headers) {
 }
 
 
-// just for fun - with color samples (if color column present)
-function renderTableWithColors(tbl, headers, rows, footers=headers) {
+// just for fun - with color samples (if color column present) and wrap text
+function renderTableBetter(tbl, headers, rows, footers=headers) {
   const colorColumns = []
 
   tbl.tHead.children[0].innerHTML =
@@ -53,8 +53,8 @@ function renderTableWithColors(tbl, headers, rows, footers=headers) {
 
   function cellsHTML(row, colorColumns=[]) {
     return row.reduce( (html, str, i) =>
-      html + (i? `<td>${ str } ${ colorColumns.includes(i)?
-        `<b style=background:${str}>| |</b>`:'' }</td>`
-          : `<th>${ str }</th>`), '' )
+      html + (i? `<td ${ str.length>170? 'style=white-space:normal':'' }>
+        ${ str } ${ colorColumns.includes(i)? `<b style=background:${str}
+          >| |</b>`:'' }</td>` : `<th>${ str }</th>`), '' )
   }
 }
