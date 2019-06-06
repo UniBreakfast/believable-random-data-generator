@@ -2,20 +2,20 @@
 
 Arrays of first and last names, nicknames, cities, countries, animals, colors, sonets, fantasy features, elements, creatures etc.
 
-Functions to generate arrays of headers with rows of believable data (people, dates, score, accounting, game creatures and characteristics, timestamps, text) easily transformable into objects. May be used for generating stub JSON for training data manipulation or for mockups. Also some functions for transforming arrays of headers and rows into objects and back.And do the same for ```rndneeds.js``` if you're planning to use ```rnd(...)``` for dates or generation of arrays of random values at one go.
+Functions to generate arrays of headers with rows of believable data (people, dates, score, accounting, game creatures and characteristics, timestamps, text) easily transformable into objects. May be used for generating stub JSON for training data manipulation or for mockups. Also some functions for transforming arrays of headers and rows into objects and back.
 
-I made it for enjoyable table component development.
+I made these for enjoyable table component development.
 
 Versatile ```rnd(...)``` function for numbers, arrays, objects, dates, string combinations etc is from [my other project](https://github.com/UniBreakfast/rnd) so look there for elaborate documentation on how to use it.
 
 
-- [believable-random-data-generator](#believable-random-data-generator)
+## Table of Contents:
+
   - [Installation:](#installation)
   - [Usage:](#usage)
     - [Example group 0 - Basic usage of persons(num):](#example-group-0---basic-usage-of-personsnum)
-    - [Example group 1 - Using persons(...) with custom results:](#example-group-1---using-persons-with-custom-results)
-    - [Example group X - GROUP_NAME:](#example-group-x---groupname)
-    - [Example group X - GROUP_NAME:](#example-group-x---groupname-1)
+
+    1. [Example group 1 - Using persons(...) with custom results:](#example-group-1---using-persons-with-custom-results)
   - [Contributing:](#contributing)
   - [Credits:](#credits)
   - [License:](#license)
