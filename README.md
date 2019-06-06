@@ -9,24 +9,16 @@ I made it for enjoyable table component development.
 Versatile ```rnd(...)``` function for numbers, arrays, objects, dates, string combinations etc is from [my other project](https://github.com/UniBreakfast/rnd) so look there for elaborate documentation on how to use it.
 
 
-## Table of Contents:
-
-  * [Installation](#installation)
-  * [Usage](#usage)
-    * [shorthand for Math.random()](#example-0---mathrandom-shorthand)
-
-    1. [random integer](#example-group-1---integers)
-    1. [random character from a range](#example-group-2---characters)
-    1. [random date](#example-group-3---dates)
-    1. [random array element](#example-group-4---array-elements)
-    1. [random object key by weight](#example-group-5---object-property-names)
-    1. [random true/false by percentage](#example-group-6---boolean-with-probability)
-    1. [predictably altered random](#example-group-7---predictably-altered-probability)
-    1. [arrays of random results](#example-group-8---make-arrays-of-results)
-    1. [preformatted dates](#example-group-9---preformatted-dates)
-  * [Contributing](#contributing)
-  * [Credits](#credits)
-  * [License](#license)
+- [believable-random-data-generator](#believable-random-data-generator)
+  - [Installation:](#installation)
+  - [Usage:](#usage)
+    - [Example group 0 - Basic usage of persons(num):](#example-group-0---basic-usage-of-personsnum)
+    - [Example group 1 - Using persons(...) with custom results:](#example-group-1---using-persons-with-custom-results)
+    - [Example group X - GROUP_NAME:](#example-group-x---groupname)
+    - [Example group X - GROUP_NAME:](#example-group-x---groupname-1)
+  - [Contributing:](#contributing)
+  - [Credits:](#credits)
+  - [License:](#license)
 
 
 ## Installation:
@@ -121,34 +113,109 @@ If you only need the arrays they are in the ```stuff.js```
   This last format is suitable for ```console.table(...)```
 
 
-### Example group X - GROUP_NAME:
+### Example group 1 - Using persons(...) with custom results:
 
-  Text before example
-
-  ```js
-    > persons
-    // ""  - random something like that
-  ```
-
-  Text after example
-
-  Text before example
+  Function persons(num [, options]) accepts the following options:
 
   ```js
-    > persons
-    // ""  - random something like that
+    > persons(num, {
+        omitRest,  // if this it NOT set to truthy, all omitted options are
+                   // randomized! If it is truthy, only specified options
+                   // will determine the columns/values of the result, so
+                   // there will be no other columns
+        useId,   // 0, 1 or {...}   - options for ids(...) function
+        naming,   // {...}   - options for namesGenders(...) function
+        genders,   // 0, 1 or {...}   - sub-options for genders option for
+                   //                    namesGenders(...) function
+        birthdays,  // 0, 1 or {...}   - options for birthAge(...) function
+        age,     // 0, 1 or {...}   - options for birthAge(...) function
+        origin,   // 0, 1, 2   - columns or {...} - options
+                  //          for origins(...) function
+        status,    // 0 or 1   - here and below numbers without detailed
+                   //           explanations mean simply the number of columns
+        colors,  // 0, 1 or 2   - columns with CSS colors
+        creatures:  // 0, 1, 2   - columns with appropriate creatures or ...
+        {
+          fauna,   // 0, 1 or 2   - number of columns with real animals
+          fantasy, // 0, 1 or 2   - columns with fantasy creatures or characters
+        },
+        points, // 0, 1, 2, 3    - columns
+                // or {...}   - options for charPoints(...) function
+        quote,   // 0 or 1   - should result contain Shakespeare's quote column
+        account,  // 0, 1, 2, 3 or 4   - columns of financial info
+        scores,  // 0, 1, 2 or 3   - columns for the player scoring
+        sentence,   // 0 or 1    - lorem sentence
+        paragraph,   // 0 or 1    - lorem paragraph
+        timestamp   // 0 or 1    - created/modified datetime columns
+      })
   ```
 
-  Text after example
-
-  Text before example
+  Here is an example with options for a gaming flavored random mockup-data
 
   ```js
-    > persons
-    // ""  - random something like that
+    > persons(40, {
+        omitRest: 1,
+        useId: { preset: 0, chars: ['-',''] },
+        naming: { form: 'playful', joined: 1 }, genders: 1,
+        birthdays: 1, age: 1,
+        origin: { joined: 1 },
+        status: 1, colors: 1,
+        creatures: { fantasy: 2, fauna: 1 },
+        points: 3, quote: 1,
+        scores: 3, sentence: 1,
+        timestamp: 1
+      })
+    // [
+    //   ["id", "fullname", "gender", "age", "born", "from", "status", "favorite color", "playing character", "reserve character", "totem animal", "hitpoints", "magicka", "stamina", "quote", "points total", "rounds won", "tries before quitting", "ancient spell", "created", "modified"],
+    //   [
+    //     ["a-2", "Thalia :Curtisan: DeJesus", "F", 42, "22.08.1976", "Santo Domingo, Dominican Republic", "active", "LawnGreen", "brave changeling", "white tennin", "grouse", "54/110", "60/60", "20/20", `"How can my muse want subject to invent?"`, "1,260,000", 15, 69, "Ad mauris purus vivamus semper neque vivamus viver itur molestie lectus, nibh id tempor gnutti nibh.", "2019-05-02 08:14:59", "2019-06-03 00:11:30"],
+    //     ["a-3", "Maximillian :Unreal: Bean", "M", 29, "25.01.1990", "Khulna, Bangladesh", "", "CadetBlue", "true genie", "kinky striga", "capybara", "120/120", "40/40", "10/60", `"But he that writes of you, if he can tell."`, "449,000", 42, 210, "Vestibulum hendrerit commodo et vici, ultrices at, emper hac ultricies vitae quisque senectus nulla!", "2018-11-05 12:50:21", "2019-03-12 05:14:43"],
+    //     ["b-2", "Daryl :Diablo: Liu", "M", 35, "02.06.1984", "Maracaibo, Venezuela", "", "Green", "mirror kami", "glacial goblin", "shark", "69/120", "10/10", "30/30", `"Beauteous thou art, therefore to be assail'd?"`, "30,000", 9, 1, "Dictumst tempor praesent phasellus feugiat, semper pendisse, vestibulum hac faucibus elit enim eget.", "2019-03-10 19:00:55", "2019-05-26 22:03:59"],
+    //     ... 37 more rows like that
+    //   ]
+    // ]  - random something like that
   ```
 
-  Text after example
+  And here is an example for a shorter formal random data
+
+  ```js
+    > persons(20, {
+        omitRest: 1,
+        naming: { form: 'formal', joined: 1 },
+        account: 4,
+        timestamp: 1
+      })
+    // [
+    //   ["full name", "balance", "income", "spendings", "debt", "created", "modified"],
+    //   [
+    //     ["Mrs. Bradshaw, Alissa", "$897,000.00", "$0.00", "-$5,440.00", "$0.00", "2018-08-19 17:56:06", "2018-11-20 02:52:05"],
+    //     ["Mr. Betancourt, Rick", "$331.00", "+$79,800.00", "-$81,200.00", "$6,810.00", "2019-03-15 08:59:06", "2019-04-05 16:48:37"],
+    //     ["Mr. Paulson, Lane", "$51,300.00", "+$7,110.00", "-$46,200.00", "$0.00", "2019-05-26 17:40:58", "2019-05-30 09:20:17"],
+    //     ... 17 more rows like that
+    //   ]
+    // ]  - random something like that
+  ```
+
+  But if, for example, you try the same without the ```omitRest: 1``` option you'll get some other columns on random
+
+  ```js
+    > persons(20, {
+        naming: { form: 'formal', joined: 1 },
+        account: 4,
+        timestamp: 1
+      })
+    // [
+    //   ["id", "fullname", "gender", "age", "birthday", "country", "city", "color preference", "balance", "income", "spendings", "debt", " proverb", "created", "modified"],
+    //   [
+    //     ["1", "mr. Jace Martino", "M", 20, "07.08.1998", "Indonesia", "Medan", "White", "$1,440.00", "+$979.00", "-$6,940.00", "$0.00", "Morbi litora?", "2019-01-15 23:19:16", "2019-06-01 16:10:47"],
+    //     ["2", "mrs. Teagan Delong", "F", 58, "14.03.1961", "Mexico", "Mexicali", "DarkMagenta", "$0.00", "+$9,400.00", "-$104.00", "$0.00", "Ligula quis eget urna sed felis pretium nec, vehic cras cursus, sit scelerisque consequat ultrices.", "2018-09-10 10:42:55", "2019-01-10 09:41:03"],
+    //     ["3", "mr. Jovanni Hsu", "M", 58, "17.09.1960", "Brazil", "Recife", "LightPink", "$18,400.00", "+$4,100.00", "-$2,400.00", "$842.00", "Platea faucibus class perpetum gnutti conubia.", "2018-09-19 03:42:33", "2019-04-11 19:03:37"],
+    //     ... 17 more rows like that
+    //   ]
+    // ]  - random something like that, and omitted options columns will be different each time
+  ```
+
+  And don't forget, you can easily pass the result through ```objectifyRecords(...)``` or have ```recordsAsObject(...)``` as you've seen in the previous Example group.
 
 
 ### Example group X - GROUP_NAME:

@@ -5,7 +5,7 @@ const persons = (num, options={}) => {
   {   // for details on options objects passed deeper see their docs or examples
     omitRest: 0 or 1,   // if not enabled all omitted options are randomly added
     useId: 0, 1 or { ...options for ids function are: preset, chars },
-    naming: { ...options to be passed into namesGenders functio are: form,
+    naming: { ...options to be passed into namesGenders function are: form,
       joined, name1st },       // only this one does not obey to omitRest and
                                // is generated even if omitted
     genders: 0, 1 or { ...sub-options for genders option for namesGenders func},
