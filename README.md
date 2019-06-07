@@ -13,14 +13,15 @@ Versatile ```rnd(...)``` function for numbers, arrays, objects, dates, string co
 
 ## Table of Contents:
 
-  - [Installation:](#installation)
-  - [Usage:](#usage)
-    - [Example group 0 - Basic usage of persons(num):](#example-group-0---basic-usage-of-personsnum)
+  - [Installation](#installation)
+  - [Usage](#usage)
+    - [Example group 0 - Basic usage of persons(num)](#example-group-0---basic-usage-of-personsnum)
 
-    1. [Example group 1 - Using persons(...) with custom results:](#example-group-1---using-persons-with-custom-results)
-  - [Contributing:](#contributing)
-  - [Credits:](#credits)
-  - [License:](#license)
+    1. [Example group 1 - Using persons(...) with custom results](#example-group-1---using-persons-with-custom-results)
+    2. [Example group 2 - Partials - functions behind the persons(...)(#example-group-2---partials---functions-behind-the-persons)
+  - [Contributing](#contributing)
+  - [Credits](#credits)
+  - [License](#license)
 
 
 ## Installation:
