@@ -1,6 +1,6 @@
 
 // generate an array of records with person information
-const persons = (num, options={}) => {
+const persons = (num=10, options={}) => {
   /* options may be like
   {   // for details on options objects passed deeper see their docs or examples
     omitRest: 0 or 1,   // if not enabled all omitted options are randomly added

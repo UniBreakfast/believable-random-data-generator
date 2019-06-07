@@ -220,66 +220,83 @@ If you only need the arrays they are in the ```stuff.js```
   And don't forget, you can easily pass the result through ```objectifyRecords(...)``` or have ```recordsAsObject(...)``` as you've seen in the previous Example group.
 
 
-### Example group X - GROUP_NAME:
+### Example group 2 - Partials - functions behind the persons(...):
 
-  Text before example
-
-  ```js
-    > persons
-    // ""  - random something like that
-  ```
-
-  Text after example
-
-  Text before example
+  There are a lot of them actually.
 
   ```js
-    > persons
-    // ""  - random something like that
+      ids(num [, options])    // generates id columns
+      namesGenders(num [, options])    // generates columns with firstnames,
+                                      // lastnames, nicknames, titles and gender
+      birthAge(num [, options])    // generates birthdays and age columns
+      origins(num [, options])    // generates city and country columns
+      colouring(num [, options])    // generates columns with CSS-colors in them
+      familiars(num [, distinct])    // generate fantasy creatures
+      makePoints(options)    // generates points in game-like format like 73/100
+      charPoints(num [, options])    // generates columns of game-like points
+      quoting(num)    // simulate quotes from Shakespeare's sonnets
+      makeAmount(digits)    // generates big numbers with comma-separation 1,000
+      scoring(num [, options])    // generates columns with game-like scores
+      accounting(num [, options])    // generates columns with financial info
+      createModify(num)    // generates columns with datetime log-data
   ```
 
-  Text after example
+  All of these are documented quite well with the comments and examples inside the ```partials.js``` itself, so if you need to use them, [look there](https://github.com/UniBreakfast/believable-random-data-generator/blob/master/partials.js).
 
-  Text before example
+  There is one I find the funnies - it's the ```familiars(num, distinct)``` function. It's to be used to generate fantasy characters, creatures and entities. Some results are quite clever and some are just funny, I can read them for hours. :)
 
   ```js
-    > persons
-    // ""  - random something like that
+    > familiars(100, 1)
+    // ["bloody striker", "weird rogue", "mountain vampire",
+    //  "electric projection", "rot copycat", "brittle crab",
+    //  "morphic werecat", "crazy rover", "twin vibria", "fierce foglet",
+    //  "rubber merc", "brass priest", "false prophet", "sane bannerman",
+    //  "anxious upin", "emerald frightener", "meteoric cemetaur",
+    //  "necro rat", "static satyr", "unchained bullvore", "static garkain",
+    //  "agitated unicorn", "infernal wyrm", "insane armor", "spectral lynx",
+    //  "agitated minotaur", "leather yanari", "wood myling", "rift faun",
+    //  "necro acolyte", "gross guide", "stone wolf", "ink worm",
+    //  "steam walker", "wise mutant", "magma pard", "sugar elemental",
+    //  "ionic cerberus", "gorgeous renegade", "high form",
+    //  "curious devourer", "friendly pillar", "divine unicorn",
+    //  "cold twin", "winged lord", "lake carbuncle", "diamond warg",
+    //  "sour armor", "copper endrega", "high fairy", "ice moss",
+    //  "cloaked templar", "arcane fiend", "white visionary",
+    //  "meteoric sphinx", "sturdy viking", "odd gremlin", "fallen vampire",
+    //  "fire draconid", "dream bunny", "swamp garkain", "brass nargun",
+    //  "sour tigris", "phasing moth", "high wisp", "happy creeper",
+    //  "snow madness", "dubious lord", "quartz strix", "plain dude",
+    //  "notorious widow", "future rider", "odd dude", "fluffy rat",
+    //  "sapphire edge", "serenity goblin", "famed kabouter", "mech warden",
+    //  "high servo", "sturdy knocker", "rubber cyclops", "light servant",
+    //  "crazy grigg", "diamond assassin", "eerie goblin", "armored vine",
+    //  "scarred shape", "invisible raven", "ether zeugl", "undead walker",
+    //  "little construct", "crazy mimic", "brass star", "mud nomad",
+    //  "violent priest", "wood priest", "sky faun", "ferocious lamia",
+    //  "rainbow warden", "diamond bannerman"]  - random something like that
   ```
 
-  Text after example
+  And you can remove or add your own features and creatures to the respective arrays in ````stuff.js```` file, just as you can edit arrays with male and female names, lastnames, nicknames, cities, countries, animals etc in there.
 
-
-### Example group X - GROUP_NAME:
-
-  Text before example
+  In a way similar to the way previous example works (internally) you can also generate people data with the ```namesGenders(...)``` function
 
   ```js
-    > persons
-    // ""  - random something like that
+    > namesGenders(7)
+    // [
+    //   ["title", "first name", "last name", "gender"],
+    //   [
+    //     ["dr.", "Leonel", "Boudreau", "male"],
+    //     ["mr.", "Alfred", "Bullock", "male"],
+    //     ["miss", "Daniela", "Lockhart", "female"],
+    //     ["mrs.", "Michelle", "Hardy", "female"],
+    //     ["mr.", "Ahmad", "Eaton", "male"],
+    //     ["mrs.", "Annette", "Means", "female"],
+    //     ["mr.", "Dwight", "Schuster", "male"]
+    //   ]
+    // ]  - random something like that, again columns may be different
   ```
 
-  Text after example
-
-  Text before example
-
-  ```js
-    > persons
-    // ""  - random something like that
-  ```
-
-  Text after example
-
-  Text before example
-
-  ```js
-    > persons
-    // ""  - random something like that
-  ```
-
-  Text after example
-
-
+  And for the most of these partial functions, just as for the ```persons(...)``` function itself, if you omit the options parameter the result columns will be random as well.
 
 
 ## Contributing:

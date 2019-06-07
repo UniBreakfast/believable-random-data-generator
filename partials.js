@@ -52,7 +52,7 @@ const lorem = {
 }
 
 // generates and array of unique identifiers by random or selected preset
-const ids = (num, options={}) => {
+const ids = (num=100, options={}) => {
   /* options may be like
   {                        // omitted options are left to be chosen randomly
     preset: 0, 1, 2 or 3     // exact scheme for ids, options are:
@@ -94,7 +94,7 @@ const ids = (num, options={}) => {
 
 
 // generates records with names (and optionally titles/nicknames, gender)
-const namesGenders = (num, options={}) => {
+const namesGenders = (num=100, options={}) => {
   /* options may be like
   {                        // all omitted options are left to be chosen randomly
     joined: 0 or {nameAbbr: 1 or 0},  // first/last in one cell, initial or full
@@ -199,7 +199,7 @@ const namesGenders = (num, options={}) => {
 
 
 // generates records with birthdays and corresponding age
-const birthAge = (num, options={}) => {
+const birthAge = (num=100, options={}) => {
   /* options may be like
   {
     age: 1 or 0,                // show age or don't, random 5:1 otherwise
@@ -254,7 +254,7 @@ const birthAge = (num, options={}) => {
 
 
 // generates records with cities and corresponding countries
-const origins = (num, options={}) => {
+const origins = (num=100, options={}) => {
   /* options may be like
   {
     columns: 1 or 2,    // if only the number matters
@@ -306,7 +306,7 @@ const origins = (num, options={}) => {
 
 
 // generates records with {columns:2 or 1} of valid CSS-color names
-const colouring = (num, options={}) => {
+const colouring = (num=100, options={}) => {
   const columns = options.columns || rnd(3)
 
   if (columns == 2) {    // for 2 columns of colors
@@ -324,7 +324,7 @@ const colouring = (num, options={}) => {
 
 
 // generates an array of [distinct] random combinations of "feature creature"
-const familiars = (num, distinct) =>
+const familiars = (num=100, distinct) =>
   makeArr( num, ()=> rnd(features, creatures), distinct )
 
 
@@ -353,7 +353,7 @@ const makePoints = (options={}) => {
 
 
 // generates an array of records with hitpoints, mana, stamina
-const charPoints = (num, options={}) => {
+const charPoints = (num=100, options={}) => {
   /* options may be like
   {
     columns: 1, 2 or 3,     // number of columns desired
@@ -386,10 +386,10 @@ const charPoints = (num, options={}) => {
 
 
 // generate an array of records with phrase excerpts from Shakespeare's sonnets
-const quoting = (num) => {
+const quoting = (num=100) => {
   const header = rnd( ['motto', 'creed', 'code phrase', 'quote'] ),
         rows = makeArr( num, ()=> ['"' + rnd( rnd(sonnets) )
-          .replace(/[,?;:!\.]$|\.\.\.$|--$/,  '')  // clean end punctuation sign
+          .replace(/[,?;:!\.]$|\.\.\.$| —$/,  '')  // clean end punctuation sign
             + rnd( {'.': 12, '!': 3, '?': 1} ) + '"'] )   // add another instead
   return [ [header], rows ]
 }
@@ -401,7 +401,7 @@ const makeAmount = (digits=4) =>
 
 
 // generates an array of records with scores
-const scoring = (num, options={}) => {
+const scoring = (num=100, options={}) => {
   /* options may be like
   {
     columns: 1, 2 or 3,     // number of columns desired
@@ -435,7 +435,7 @@ const scoring = (num, options={}) => {
 
 
 // generates an array of records with accounting numbers
-const accounting = (num, options={}) => {
+const accounting = (num=100, options={}) => {
   /* options may be like
   {
     columns: 1, 2, 3 or 4,     // number of columns desired
@@ -476,7 +476,7 @@ const accounting = (num, options={}) => {
 
 
 // generate an array of records with adequate created/modifed datetimes
-const createModify = (num) => {
+const createModify = (num=100) => {
   const year = 365.25*864e5,
         rows = makeArr(num, ()=> {
           const created = rnd(year)

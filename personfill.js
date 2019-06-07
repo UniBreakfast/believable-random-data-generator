@@ -53,7 +53,7 @@ function renderTableBetter(tbl, headers, rows, footers=headers) {
 
   function cellsHTML(row, colorColumns=[]) {
     return row.reduce( (html, str, i) =>
-      html + (i? `<td ${ str.length>170? 'style=white-space:normal':'' }>
+      html + (i? `<td ${ str.length>180? 'style=white-space:normal':'' }>
         ${ str } ${ colorColumns.includes(i)? `<b style=background:${str}
           >| |</b>`:'' }</td>` : `<th>${ str }</th>`), '' )
   }
