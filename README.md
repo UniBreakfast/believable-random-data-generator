@@ -6,9 +6,9 @@ Functions to generate arrays of headers with rows of believable data (people, da
 
 I made these for enjoyable table component development.
 
-To see it in action just go to the [unibreakfast.github.io/believable-random-data-generator/](https://unibreakfast.github.io/believable-random-data-generator/) and hit ```F5``` (refresh) until satisfied - there will be different columns, headers and values every time. The table with fixed headers, footers and 1st column is from [my other project](https://github.com/UniBreakfast/web-table-w-fixed-first-last).
+To see it in action just go to the [unibreakfast.github.io/believable-random-data-generator/](https://unibreakfast.github.io/believable-random-data-generator/) and hit ```F5``` (refresh) until satisfied - there will be different columns, headers and values every time. The table with fixed headers, footers and 1st column is from [my other project (web-table-w-fixed-first-last)](https://github.com/UniBreakfast/web-table-w-fixed-first-last).
 
-Versatile ```rnd(...)``` function for numbers, arrays, objects, dates, string combinations etc is from [my other project](https://github.com/UniBreakfast/rnd) so look there for elaborate documentation on how to use it.
+Versatile ```rnd(...)``` function for numbers, arrays, objects, dates, string combinations etc is from [my other project (rnd)](https://github.com/UniBreakfast/rnd) so look there for elaborate documentation on how to use it.
 
 
 ## Table of Contents:
