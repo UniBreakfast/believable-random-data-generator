@@ -64,7 +64,7 @@ If you only need the arrays they are in the ```stuff.js```
     //   ["id", "full name", "gender", "color", "totem animal"],
     //   [
     //     ["02", "Chau, Celina", "female", "Coral", "vulture"],
-    //     ["07", "Starr, Jaquez", "male", "Cyan", "sand dollar],
+    //     ["07", "Starr, Jaquez", "male", "Cyan", "sand dollar"],
     //     ["10", "Hall, Davis", "male", "RosyBrown", "trout"],
     //     ["14", "Delgado, Ashlynn", "female", "DarkRed", "buffalo"]
     //   ]
