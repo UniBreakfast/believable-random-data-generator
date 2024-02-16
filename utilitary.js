@@ -68,3 +68,12 @@ const countUnique = (arr) => {
   arr.forEach( item =>  obj[item] = 1 + (obj[item] || 0) )
   return obj
 }
+
+Object.assign(globalThis, {
+  makeArr,
+  integers,
+  countUnique,
+  standartDatetime,
+  formatDatetime,
+  addCommas
+})

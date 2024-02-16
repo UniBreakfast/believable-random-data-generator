@@ -485,3 +485,19 @@ const createModify = (num=100) => {
         })
   return [ ['created','modified'], rows ]
 }
+
+
+Object.assign(globalThis, {
+  namesGenders,
+  ids,
+  birthAge,
+  origins,
+  colouring,
+  quoting,
+  accounting,
+  scoring,
+  charPoints,
+  lorem,
+  familiars,
+  createModify
+})

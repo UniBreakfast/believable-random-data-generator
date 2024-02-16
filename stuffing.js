@@ -214,3 +214,7 @@ const persons = (num=10, options={}) => {
 
 // random spread for different numbers of columns - copy and run in console
 // probe(makeArr(10000,_=>persons(1)).reduce((counts,cur)=>{const count=''+cur[0].length;counts[count]=counts[count]?counts[count]+1:1;return counts},{}))
+
+Object.assign(globalThis, {
+  persons
+})

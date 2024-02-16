@@ -129,3 +129,7 @@ const rnd = (...args) => {
 // rnd(arr1, arr2) == string of random combination of some el from arr1 w el from arr2
 // rnd(Date, num) == array of num random datetimes from 1970 to now
 // rnd('DD.MM.YYYY', num) == array of num random dates/times from 1970 to now in provided format
+
+Object.assign(globalThis, {
+  rnd
+})

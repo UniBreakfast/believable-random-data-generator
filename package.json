@@ -1,0 +1,20 @@
+{
+  "name": "believable-random-data-generator",
+  "version": "1.0.0",
+  "description": "Arrays of first and last names, nicknames, cities, countries, animals, colors, sonets, fantasy features, elements, creatures etc.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node --watch index "
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/UniBreakfast/believable-random-data-generator.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/UniBreakfast/believable-random-data-generator/issues"
+  },
+  "homepage": "https://github.com/UniBreakfast/believable-random-data-generator#readme"
+}

@@ -3326,3 +3326,21 @@ const maintainArrLines77 = (arr) => {
         lines = concatBy(readyArr, 77)
   document.body.innerHTML = '<pre>`'+lines+'`.split(/,\\s*/)</pre>'
 }
+
+Object.assign(globalThis, {
+  lastNames,
+  femaleNames,
+  maleNames,
+  nicknames,
+  cities,
+  months,
+  colors,
+  animals,
+  features,
+  creatures,
+  sonnets,
+  lorems,
+  uniqueSorted,
+  maintainArrLines77,
+  monthShorts
+})

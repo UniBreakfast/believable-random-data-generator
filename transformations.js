@@ -76,3 +76,10 @@ const arrayifyRecords = (data, vary) => {
 // changes between an object with headers,rows and an array with headers,rows
 const recordsAsObject = (recArr) => ({ headers: recArr[0], rows: recArr[1] }),
       recordsAsArray = (recObj) => [recObj.headers, recObj.rows]
+
+
+Object.assign(globalThis, {
+  namesGenders,
+  ids,
+  flipNested
+})
